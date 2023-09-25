@@ -45,9 +45,6 @@
 SourceArt/**/*.png
 SourceArt/**/*.tga
 
-#Rider Ignore
-.idea/
-
 # Binary Files
 Binaries/*
 Plugins/*/Binaries/*
