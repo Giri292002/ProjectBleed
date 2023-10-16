@@ -94,6 +94,10 @@ void UPBAudioDetectionSubsystem::SetupSubsystem()
 
 bool UPBAudioDetectionSubsystem::WasOnBeat( float& OutAccuracy, const EBeatType InBeatType)
 {
+	const float AccuracyFromLastBeat =( BeatLeniency - TimeSinceLastBeat[InBeatType]) / BeatLeniency;
+	const float AccuracyToNextBeat = (BeatLeniency - GetTimeTillNextBeat(InBeatType)) / BeatLeniency;
+	//Select the more accurate percentage
+	OutAccuracy = FMath::Clamp(AccuracyFromLastBeat >= AccuracyToNextBeat ? AccuracyFromLastBeat : AccuracyToNextBeat, 0.f, 1.f);
 	return TimeSinceLastBeat[EBeatType::Half] <= GetBeatLeniency() || GetTimeTillNextBeat(InBeatType) < GetBeatLeniency();
 }
 
@@ -149,8 +153,12 @@ void UPBAudioDetectionSubsystem::OnBeatCallback(int32 Bar, int32 Beat, int32 Pos
                                                 int32 TimeSignatureUpper, int32 TimeSignatureLower)
 {	
 	UpdateEventInformation(GetCurrentEventInformation(), Bar, Beat);
+
 	TimeSinceLastBeat[EBeatType::Any] = 0.f;
 	TimeSinceLastBeat[EBeatType::Whole] = 0.f;
+	TimeSinceLastBeat[EBeatType::Half] = 0.f;
+	TimeSinceLastBeat[EBeatType::Quarter] = 0.f;
+	
 	OnBeatOccurDelegate.Broadcast();
 	
 	if(GetCurrentEventInformation().bFinishSettingUp)
@@ -165,6 +173,7 @@ void UPBAudioDetectionSubsystem::OnHalfBeatCallback()
 	OnHalfBeatOccurDelegate.Broadcast();
 	TimeSinceLastBeat[EBeatType::Any] = 0.f;
 	TimeSinceLastBeat[EBeatType::Half] = 0.f;
+	TimeSinceLastBeat[EBeatType::Quarter] = 0.f;
 	GetWorld()->GetTimerManager().SetTimer(HalfBeatTimerHandle, this, &UPBAudioDetectionSubsystem::OnHalfBeatCallback, GetCurrentEventInformation().BeatIntervals[EBeatType::Half]);
 }
 

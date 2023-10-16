@@ -43,21 +43,20 @@ void UPBScoringSubsystem::AddToScore(const UPBScoreData* InScore)
 		return;
 	}
 	UPBAudioDetectionSubsystem* AudioDetectionSubsystem = GetWorld()->GetSubsystem<UPBAudioDetectionSubsystem>();
-	float Accuracy;
-	if(AudioDetectionSubsystem->WasOnBeat(Accuracy))
-	{
-		
-		UE_LOG(LogPBScoringSubsystem, Log, TEXT("Was on beat with accuracy: TODO: Accuracy"));
+	float OutAccuracy;
+	if(AudioDetectionSubsystem->WasOnBeat(OutAccuracy))
+	{		
+		UE_LOG(LogPBScoringSubsystem, Log, TEXT("Was on beat with accuracy: %f"), OutAccuracy);
 	}
 	else
 	{
-		UE_LOG(LogPBScoringSubsystem, Log, TEXT("Was NOT on beat with accuracy: TODO: Accuracy"));
+		UE_LOG(LogPBScoringSubsystem, Log, TEXT("Was NOT on beat with accuracy: %f"), OutAccuracy);
 	}
-	const int PreviousScore = CurrentScore;
+	const float ScoreToAdd = FMath::Clamp(InScore->ScoreToAdd * OutAccuracy, 0, InScore->ScoreToAdd);
 	//This will later be modified to be reduced based on how delayed or how early you pressed
-	const int FinalAddedScore = InScore->ScoreToAdd;
+	const int FinalAddedScore = FMath::TruncToInt(ScoreToAdd);
 	
 	BaseScore += FinalAddedScore;
 	CurrentScore = BaseScore * CurrentScoreMultiplier;
-	UE_LOG(LogPBScoringSubsystem, Log, TEXT("Added %i to %i. Current Score is: %i"), FinalAddedScore, PreviousScore, CurrentScore);
+	UE_LOG(LogPBScoringSubsystem, Log, TEXT("Current Score is: %i"), FinalAddedScore, CurrentScore);
 }

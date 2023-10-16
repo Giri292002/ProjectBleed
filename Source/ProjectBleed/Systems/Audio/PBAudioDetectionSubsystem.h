@@ -113,6 +113,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category= "Audio", BlueprintPure)
 	float GetTimeSinceLastBeat(const EBeatType InBeatType = EBeatType::Any) const { return TimeSinceLastBeat[InBeatType]; }
 
+	UFUNCTION()
+	EBeatType GetLastPlayedBeat() const { return LastPlayedBeat; }
+
 	/**
 	 * Time till the next beat. Beat Interval - Time since last beat type.
 	 * @param InBeatType Which next beat value do we want. If any, the next half beat is returned. Check WasOnBeat() comment.
@@ -127,10 +130,10 @@ public:
 	* Checks if player was on beat by checking if the time since any last beat or time till next half beat is smaller than the Beat Leniency.
 	* We use half step since that's the most accurate substep for the player since doing actions on quarter beat is not supported.
 	* @param InBeatType What type of beat should we check against. Default is any ie. Whole and half.
-	* @param OutAccuracy How accurate was the player in hitting the beat. Maximum is clamped at beat leniency.
+	* @param OutAccuracy How accurate was the player in hitting the beat. 0 = 0%, 1 = 100%
 	*/
 	UFUNCTION()
-	bool WasOnBeat(float& OutAccuracy, const EBeatType InBeatType = EBeatType::Any);
+	bool WasOnBeat(float& OutAccuracy, const EBeatType InBeatType = EBeatType::Half);
 	
 protected:
 	//Event information of the current event that's playing
@@ -210,6 +213,9 @@ private:
 
 	UPROPERTY()
 	APBBackgroundMusicPlayer* BackgroundMusicPlayer;	
+
+	UPROPERTY()
+	EBeatType LastPlayedBeat;
 
 	//Fills up CurrentEventInformation. Called from the first beat of an event
 	UFUNCTION()
