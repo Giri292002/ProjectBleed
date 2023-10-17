@@ -11,8 +11,11 @@ struct FInputActionValue;
 class UInputMappingContext;
 class UCameraComponent;
 class USpringArmComponent;
-
+class UPBInteractionComponent;
 class UPBDashComponent;
+
+DECLARE_LOG_CATEGORY_EXTERN(LogPBCharacter, Log, All);
+
 UCLASS()
 class PROJECTBLEED_API APBCharacter : public ACharacter, public IPBInput
 {
@@ -34,6 +37,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Locomotion")
 	UPBDashComponent* DashComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Interaction")
+	UPBInteractionComponent* InteractionComponent;
 
 	UPROPERTY()
 	FVector2D MovementDirection;
@@ -59,4 +65,7 @@ public:
 
 	UFUNCTION()
 	void Dash();
+
+	UFUNCTION()
+	void Interact();
 };

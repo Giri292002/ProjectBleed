@@ -22,6 +22,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UInputAction* DashAction;
 
+	UPROPERTY(EditDefaultsOnly)
+	UInputAction* InteractAction;
+
 	UPROPERTY()
 	FRotator NewControlRotation = FRotator::ZeroRotator;
 

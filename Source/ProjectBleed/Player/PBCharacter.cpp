@@ -7,13 +7,16 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "ProjectBleed/Systems/Locomotion/PBDashComponent.h"
+#include "ProjectBleed/Systems/Interaction/PBInteractionComponent.h"
+#include "ProjectBleed/Libraries/CustomLogging.h"
 
-class UPawnMovementComponent;
+DEFINE_LOG_CATEGORY(LogPBCharacter);
+
 // Sets default values
 APBCharacter::APBCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	SpringArmComponent->SetupAttachment(RootComponent);
@@ -22,6 +25,8 @@ APBCharacter::APBCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
 	DashComponent = CreateDefaultSubobject<UPBDashComponent>(TEXT("DashComponent"));
+
+	InteractionComponent = CreateDefaultSubobject<UPBInteractionComponent>(TEXT("InteractionComponent"));
 
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationPitch = false;
@@ -74,4 +79,13 @@ void APBCharacter::Move(const FInputActionValue& ActionValue)
 void APBCharacter::Dash()
 {
 	DashComponent->PerformDash(MovementDirection);
+}
+
+void APBCharacter::Interact()
+{
+	if (!IsValid(InteractionComponent))
+	{
+		VSCREENMSG("Invalid Interaction Component");
+	}
+	InteractionComponent->Interact();
 }

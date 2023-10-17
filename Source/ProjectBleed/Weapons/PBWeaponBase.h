@@ -23,6 +23,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)	
 	APBCharacter* PBOwnerCharacter = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	USkeletalMeshComponent* WeaponMesh;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* EquipAnimation;
 

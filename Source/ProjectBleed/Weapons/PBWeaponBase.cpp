@@ -9,8 +9,10 @@ DEFINE_LOG_CATEGORY(LogPBWeapon)
 APBWeaponBase::APBWeaponBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+	SetRootComponent(WeaponMesh);
 }
 
 // Called when the game starts or when spawned
