@@ -75,8 +75,9 @@ void APBWeaponPickupBase::Interact_Implementation(AActor* Interactor)
 
 	const FAttachmentTransformRules& AttachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
 
-	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("WeaponSocket")));
-	
+	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("weapon_r")));
+
+	Destroy();
 }
 // Called every frame
 void APBWeaponPickupBase::Tick(float DeltaTime)
