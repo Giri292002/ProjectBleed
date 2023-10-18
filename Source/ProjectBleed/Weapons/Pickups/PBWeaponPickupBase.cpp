@@ -4,6 +4,7 @@
 #include "PBWeaponPickupBase.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "../PBWeaponBase.h"
+#include "ProjectBleed/Systems/Combat/PBCombatComponent.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
 
 // Sets default values
@@ -48,34 +49,14 @@ void APBWeaponPickupBase::Interact_Implementation(AActor* Interactor)
 	//Makes sure that interaction component doesn't interact with this component again
 	InteractionPriority = -1;
 
-	APBCharacter* PBCharacterOwner = Cast<APBCharacter>(Interactor);
-
-	if (!IsValid(PBCharacterOwner))
+	if (UPBCombatComponent* CombatComponent = Interactor->GetComponentByClass<UPBCombatComponent>())
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid PBCharacter Owner"));
-		return;
+		CombatComponent->GiveWeapon(WeaponToGive);
 	}
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = Interactor;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	if (WeaponToGive == nullptr)
+	else
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid Weapon To Give Class"));
-		return;
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid CombatComponent"));
 	}
-
-	APBWeaponBase* SpawnedPBWeapon = Cast<APBWeaponBase>(GetWorld()->SpawnActor<APBWeaponBase>(WeaponToGive, GetActorLocation(), GetActorRotation(), SpawnParams));
-	if (!IsValid(SpawnedPBWeapon))
-	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid SpawnedPBWeapon"));
-		return;
-	}
-
-	const FAttachmentTransformRules& AttachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
-
-	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("weapon_r")));
 
 	Destroy();
 }

@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "ProjectBleed/Systems/Locomotion/PBDashComponent.h"
 #include "ProjectBleed/Systems/Interaction/PBInteractionComponent.h"
+#include "ProjectBleed/Systems/Combat/PBCombatComponent.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
 
 DEFINE_LOG_CATEGORY(LogPBCharacter);
@@ -27,6 +28,8 @@ APBCharacter::APBCharacter()
 	DashComponent = CreateDefaultSubobject<UPBDashComponent>(TEXT("DashComponent"));
 
 	InteractionComponent = CreateDefaultSubobject<UPBInteractionComponent>(TEXT("InteractionComponent"));
+
+	CombatComponent = CreateDefaultSubobject<UPBCombatComponent>(TEXT("CombatComponent"));
 
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationPitch = false;

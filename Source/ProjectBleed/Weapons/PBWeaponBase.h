@@ -35,17 +35,24 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
-	UFUNCTION()
-	void OnEquip();
-
-	UFUNCTION()
-	void OnUnEquip();
-
-	UFUNCTION()
-	void OnFire();
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	//Called when the weapon is equipped
+	UFUNCTION()
+	virtual void OnEquip();
+
+	//Called when the weapon is unequipped
+	UFUNCTION()
+	virtual void OnUnEquip();
+
+	//Called when the weapon is fired
+	UFUNCTION()
+	virtual void OnFire();
+
+	UFUNCTION()
+	virtual void OnStopFire();
 
 };

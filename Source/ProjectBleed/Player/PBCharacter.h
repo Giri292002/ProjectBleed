@@ -13,6 +13,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class UPBInteractionComponent;
 class UPBDashComponent;
+class UPBCombatComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPBCharacter, Log, All);
 
@@ -26,20 +27,23 @@ public:
 	APBCharacter();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed | Character | Input")
 	UInputMappingContext* InputMappingContext;
 
-	UPROPERTY(EditAnywhere, Category = "Camera")
+	UPROPERTY(EditAnywhere, Category = "ProjectBleed | Character | Camera")
 	USpringArmComponent* SpringArmComponent;
 
-	UPROPERTY(EditAnywhere, Category="Camera")
+	UPROPERTY(EditAnywhere, Category="ProjectBleed | Character | Camera")
 	UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditAnywhere, Category = "Locomotion")
+	UPROPERTY(EditAnywhere, Category = "ProjectBleed | Character | Locomotion")
 	UPBDashComponent* DashComponent;
 
-	UPROPERTY(EditAnywhere, Category = "Interaction")
+	UPROPERTY(EditAnywhere, Category = "ProjectBleed | Character | Interaction")
 	UPBInteractionComponent* InteractionComponent;
+
+	UPROPERTY(EditAnywhere, Category = "ProjectBleed | Character | Combat")
+	UPBCombatComponent* CombatComponent;
 
 	UPROPERTY()
 	FVector2D MovementDirection;

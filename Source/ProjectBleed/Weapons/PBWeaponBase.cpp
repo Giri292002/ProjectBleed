@@ -2,6 +2,7 @@
 
 
 #include "PBWeaponBase.h"
+#include <ProjectBleed/Libraries/CustomLogging.h>
 
 DEFINE_LOG_CATEGORY(LogPBWeapon)
 
@@ -24,12 +25,23 @@ void APBWeaponBase::BeginPlay()
 	if (!IsValid(PBOwnerCharacter))
 	{
 		UE_LOG(LogPBWeapon, Error, TEXT("Invalid owner"));
-	}
-	
+	}	
 }
 
 void APBWeaponBase::OnEquip()
-{
+{	
+	if (AnimationLayer == nullptr)
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
+		return;
+	}
+
+	if (EquipAnimation == nullptr)
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid EquipAnimation"));
+		return;
+	}
+
 	PBOwnerCharacter->GetMesh()->LinkAnimClassLayers(AnimationLayer);
 	PBOwnerCharacter->PlayAnimMontage(EquipAnimation);
 }
@@ -39,6 +51,10 @@ void APBWeaponBase::OnUnEquip()
 }
 
 void APBWeaponBase::OnFire()
+{
+}
+
+void APBWeaponBase::OnStopFire()
 {
 }
 
