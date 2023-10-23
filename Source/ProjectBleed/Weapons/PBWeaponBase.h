@@ -42,17 +42,17 @@ public:
 
 	//Called when the weapon is equipped
 	UFUNCTION()
-	virtual void OnEquip();
+	virtual void Equip();
 
 	//Called when the weapon is unequipped
 	UFUNCTION()
-	virtual void OnUnEquip();
+	virtual void UnEquip();
 
 	//Called when the weapon is fired
 	UFUNCTION()
-	virtual void OnFire();
+	virtual void Fire();
 
 	UFUNCTION()
-	virtual void OnStopFire();
+	virtual void StopFire();
 
 };

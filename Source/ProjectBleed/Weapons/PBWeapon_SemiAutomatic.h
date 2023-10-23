@@ -13,5 +13,5 @@ public:
 	// Sets default values for this actor's properties
 	APBWeapon_SemiAutomatic();
 
-	virtual void OnFire() override;
+	virtual void Fire() override;
 };

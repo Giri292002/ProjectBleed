@@ -7,7 +7,7 @@ APBWeapon_SemiAutomatic::APBWeapon_SemiAutomatic()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void APBWeapon_SemiAutomatic::OnFire()
+void APBWeapon_SemiAutomatic::Fire()
 {
-	Super::OnFire();
+	Super::Fire();
 }

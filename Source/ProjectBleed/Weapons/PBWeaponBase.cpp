@@ -28,7 +28,7 @@ void APBWeaponBase::BeginPlay()
 	}	
 }
 
-void APBWeaponBase::OnEquip()
+void APBWeaponBase::Equip()
 {	
 	if (AnimationLayer == nullptr)
 	{
@@ -46,7 +46,7 @@ void APBWeaponBase::OnEquip()
 	PBOwnerCharacter->PlayAnimMontage(EquipAnimation);
 }
 
-void APBWeaponBase::OnUnEquip()
+void APBWeaponBase::UnEquip()
 {
 	if (AnimationLayer == nullptr)
 	{
@@ -57,11 +57,11 @@ void APBWeaponBase::OnUnEquip()
 	PBOwnerCharacter->GetMesh()->UnlinkAnimClassLayers(AnimationLayer);
 }
 
-void APBWeaponBase::OnFire()
+void APBWeaponBase::Fire()
 {
 }
 
-void APBWeaponBase::OnStopFire()
+void APBWeaponBase::StopFire()
 {
 }
 

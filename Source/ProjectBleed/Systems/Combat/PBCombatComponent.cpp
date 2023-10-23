@@ -62,7 +62,7 @@ void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass)
 	const FAttachmentTransformRules& AttachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
 
 	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("weapon_r")));
-	SpawnedPBWeapon->OnEquip();
+	SpawnedPBWeapon->Equip();
 }
 
 void UPBCombatComponent::RemoveWeapon()
@@ -73,7 +73,7 @@ void UPBCombatComponent::RemoveWeapon()
 		return;
 	}
 
-	CurrentWeapon->OnUnEquip();
+	CurrentWeapon->UnEquip();
 	CurrentWeapon->Destroy();
 	CurrentWeapon = nullptr;
 }
@@ -86,7 +86,7 @@ void UPBCombatComponent::FireCurrentWeapon()
 		return;
 	}
 
-	CurrentWeapon->OnFire();
+	CurrentWeapon->Fire();
 }
 
 void UPBCombatComponent::StopFireCurrentWeapon()
@@ -97,7 +97,7 @@ void UPBCombatComponent::StopFireCurrentWeapon()
 		return;
 	}
 
-	CurrentWeapon->OnUnEquip();
+	CurrentWeapon->StopFire();
 }
 
 // Called every frame
@@ -105,6 +105,5 @@ void UPBCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
 }
 
