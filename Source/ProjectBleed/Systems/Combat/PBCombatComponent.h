@@ -36,6 +36,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass);
 
+	//Remove the current weapon from the character
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void RemoveWeapon();
+
 	//Fire Current Weapon
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void FireCurrentWeapon();

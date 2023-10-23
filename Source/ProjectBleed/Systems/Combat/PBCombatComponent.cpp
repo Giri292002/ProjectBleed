@@ -34,6 +34,12 @@ void UPBCombatComponent::BeginPlay()
 
 void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass)
 {
+	//Check if we already have a weapon and remove it
+	if (CurrentWeapon != nullptr)
+	{
+		RemoveWeapon();
+	}
+
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = PBCharacterOwner;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -57,6 +63,19 @@ void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass)
 
 	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("weapon_r")));
 	SpawnedPBWeapon->OnEquip();
+}
+
+void UPBCombatComponent::RemoveWeapon()
+{
+	if (CurrentWeapon == nullptr)
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid CurrentWeapon"));
+		return;
+	}
+
+	CurrentWeapon->OnUnEquip();
+	CurrentWeapon->Destroy();
+	CurrentWeapon = nullptr;
 }
 
 void UPBCombatComponent::FireCurrentWeapon()

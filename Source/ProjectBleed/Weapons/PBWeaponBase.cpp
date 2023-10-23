@@ -48,6 +48,13 @@ void APBWeaponBase::OnEquip()
 
 void APBWeaponBase::OnUnEquip()
 {
+	if (AnimationLayer == nullptr)
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
+		return;
+	}
+
+	PBOwnerCharacter->GetMesh()->UnlinkAnimClassLayers(AnimationLayer);
 }
 
 void APBWeaponBase::OnFire()
