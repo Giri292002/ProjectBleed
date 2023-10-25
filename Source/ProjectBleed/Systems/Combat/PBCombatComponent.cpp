@@ -50,7 +50,7 @@ void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass)
 		return;
 	}
 
-	APBWeaponBase* SpawnedPBWeapon = Cast<APBWeaponBase>(GetWorld()->SpawnActor<APBWeaponBase>(WeaponClass, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation(), SpawnParams));
+	APBWeaponBase* SpawnedPBWeapon = Cast<APBWeaponBase>(GetWorld()->SpawnActor<APBWeaponBase>(WeaponClass, GetOwner()->GetActorLocation(), FRotator::ZeroRotator, SpawnParams));
 	if (!IsValid(SpawnedPBWeapon))
 	{
 		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid SpawnedPBWeapon"));
@@ -59,7 +59,7 @@ void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass)
 
 	CurrentWeapon = SpawnedPBWeapon;
 
-	const FAttachmentTransformRules& AttachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
+	const FAttachmentTransformRules& AttachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
 
 	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("weapon_r")));
 	SpawnedPBWeapon->Equip();
@@ -74,6 +74,7 @@ void UPBCombatComponent::RemoveWeapon()
 	}
 
 	CurrentWeapon->UnEquip();
+	//TODO: Dont destroy, just drop the weapon
 	CurrentWeapon->Destroy();
 	CurrentWeapon = nullptr;
 }

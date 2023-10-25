@@ -72,4 +72,7 @@ public:
 
 	UFUNCTION()
 	void Interact();
+
+	UFUNCTION()
+	void Fire();
 };

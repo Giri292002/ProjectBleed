@@ -25,6 +25,7 @@ void APBPlayerController::OnPossess(APawn* InPawn)
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, InPawn, TEXT("Move"));
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, InPawn, TEXT("Dash"));
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, InPawn, TEXT("Interact"));
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, InPawn, TEXT("Fire"));
 	}
 }
 

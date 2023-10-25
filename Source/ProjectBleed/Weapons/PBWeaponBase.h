@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ProjectBleed/Systems/Scoring/PBScoringSubsystem.h"
 #include "ProjectBleed/Player/PBCharacter.h"
 #include "PBWeaponBase.generated.h"
 
@@ -23,13 +24,25 @@ protected:
 	UPROPERTY(BlueprintReadOnly)	
 	APBCharacter* PBOwnerCharacter = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Root")
+	USceneComponent* Root = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Weapon")
 	USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Scoring")
+	UPBScoreData* ScoreData = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Animation")
 	UAnimMontage* EquipAnimation;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Animation")
+	UAnimMontage* WeaponFireAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Animation")
+	UAnimMontage* CharacterFireAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Animation")
 	TSubclassOf<UAnimInstance> AnimationLayer = nullptr;
 
 	// Called when the game starts or when spawned
