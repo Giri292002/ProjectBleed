@@ -31,6 +31,12 @@ void APBWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (WeaponData == nullptr)
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid WeaponData"));
+		return;
+	}
+
 	PBOwnerCharacter = Cast<APBCharacter>(GetOwner());
 	if (!IsValid(PBOwnerCharacter))
 	{
@@ -38,63 +44,119 @@ void APBWeaponBase::BeginPlay()
 	}	
 }
 
-void APBWeaponBase::Equip()
-{	
-	if (AnimationLayer == nullptr)
-	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
-		return;
-	}
-
-	if (EquipAnimation == nullptr)
-	{
-		V_LOG(LogPBWeapon, TEXT("Invalid EquipAnimation"));
-	}
-
-	PBOwnerCharacter->GetMesh()->LinkAnimClassLayers(AnimationLayer);
-	PBOwnerCharacter->PlayAnimMontage(EquipAnimation);
-}
-
-void APBWeaponBase::UnEquip()
+void APBWeaponBase::InternalFire()
 {
-	if (AnimationLayer == nullptr)
+	if (WeaponMesh->GetAnimInstance() && WeaponData->WeaponFireAnimation)
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
-		return;
-	}
-
-	PBOwnerCharacter->GetMesh()->UnlinkAnimClassLayers(AnimationLayer);
-}
-
-void APBWeaponBase::Fire()
-{
-	if(WeaponMesh->GetAnimInstance() && WeaponFireAnimation)
-	{
-		WeaponMesh->GetAnimInstance()->Montage_Play(WeaponFireAnimation);
+		WeaponMesh->GetAnimInstance()->Montage_Play(WeaponData->WeaponFireAnimation);
 	}
 	else
 	{
 		V_LOG(LogPBWeapon, TEXT("Invalid WeaponFireAnimation"));
 	}
-	if(CharacterFireAnimation)
+	if (WeaponData->CharacterFireAnimation)
 	{
-		PBOwnerCharacter->PlayAnimMontage(CharacterFireAnimation);
-	}	
+		PBOwnerCharacter->PlayAnimMontage(WeaponData->CharacterFireAnimation);
+	}
 	else
 	{
 		V_LOG(LogPBWeapon, TEXT("Invalid CharacterFireAnimation"));
 	}
+}
+
+void APBWeaponBase::InternalBurstFire()
+{	
+	if (CurrentBurstCount + 1 >= WeaponData->BurstCount)
+	{
+		StopFire();
+		return;
+	}
+
+	CurrentBurstCount++;
+	InternalFire();
+	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &APBWeaponBase::InternalBurstFire, WeaponData->FireRate, false, 0.f);	
+}
+
+void APBWeaponBase::Equip()
+{	
+	if (WeaponData == nullptr)
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid WeaponData"));
+		return;
+	}
+
+	if (WeaponData->AnimationLayer == nullptr)
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
+		return;
+	}
+
+	if (WeaponData->EquipAnimation == nullptr)
+	{
+		V_LOG(LogPBWeapon, TEXT("Invalid EquipAnimation"));
+	}
+
+	PBOwnerCharacter->GetMesh()->LinkAnimClassLayers(WeaponData->AnimationLayer);
+	PBOwnerCharacter->PlayAnimMontage(WeaponData->EquipAnimation);
+}
+
+void APBWeaponBase::UnEquip()
+{
+	if (WeaponData->AnimationLayer == nullptr)
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
+		return;
+	}
+
+	PBOwnerCharacter->GetMesh()->UnlinkAnimClassLayers(WeaponData->AnimationLayer);
+}
+
+void APBWeaponBase::Fire()
+{
+	switch (WeaponData->WeaponFireMode)
+	{
+		case EFireMode::SemiAuto:
+		{
+			InternalFire();
+			break;
+		}
+		case EFireMode::FullAuto:
+		{
+			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &APBWeaponBase::InternalFire, WeaponData->FireRate, true, 0.f);
+			break;
+		}
+		case EFireMode::Burst:
+		{
+			InternalBurstFire();
+			break;
+		}
+		default:
+		{
+			V_LOG(LogPBWeapon, TEXT("Invalid WeaponFireMode"));
+			break;
+		}
+	}
 
 	UPBScoringSubsystem* PBScoringSystem = GetWorld()->GetSubsystem<UPBScoringSubsystem>();
 
-	if(ScoreData != nullptr && PBScoringSystem != nullptr)
+	if(WeaponData->ScoreData != nullptr && PBScoringSystem != nullptr)
 	{
-		PBScoringSystem->AddToScore(ScoreData);
+		PBScoringSystem->AddToScore(WeaponData->ScoreData);
+	}
+	else
+	{
+		V_LOG(LogPBWeapon, TEXT("Invalid ScoreData or PBScoringSystem"));
 	}
 }
 
 void APBWeaponBase::StopFire()
 {
+	if (FireTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+	}
+
+	CurrentBurstCount = 0;
 }
 
 // Called every frame

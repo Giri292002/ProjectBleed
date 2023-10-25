@@ -65,7 +65,7 @@ void UPBScoringSubsystem::AddToScore(const UPBScoreData* InScore)
 		else
 		{
 			//Play Accurate Hit Sound
-			UFMODBlueprintStatics::PlayEvent2D(GetWorld(), OnAccurateHitEvent, true);
+			//UFMODBlueprintStatics::PlayEvent2D(GetWorld(), OnAccurateHitEvent, true);
 		}		
 	}
 	else

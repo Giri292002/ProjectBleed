@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ProjectBleed/Systems/Scoring/PBScoringSubsystem.h"
+#include "Data/PBWeaponDataBase.h"
 #include "ProjectBleed/Player/PBCharacter.h"
 #include "PBWeaponBase.generated.h"
 
@@ -30,23 +31,23 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Weapon")
 	USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Scoring")
-	UPBScoreData* ScoreData = nullptr;
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Data")
+	UPBWeaponDataBase* WeaponData = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Animation")
-	UAnimMontage* EquipAnimation;
+	UPROPERTY()
+	FTimerHandle FireTimerHandle;
 
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Animation")
-	UAnimMontage* WeaponFireAnimation;
-
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Animation")
-	UAnimMontage* CharacterFireAnimation;
-
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Animation")
-	TSubclassOf<UAnimInstance> AnimationLayer = nullptr;
+	UPROPERTY()
+	int CurrentBurstCount = 0;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void InternalFire();
+
+	UFUNCTION()
+	void InternalBurstFire();
 	
 
 public:	
@@ -67,5 +68,4 @@ public:
 
 	UFUNCTION()
 	virtual void StopFire();
-
 };
