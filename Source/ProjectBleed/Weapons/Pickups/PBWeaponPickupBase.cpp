@@ -3,6 +3,9 @@
 
 #include "PBWeaponPickupBase.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
+#include "../PBWeaponBase.h"
+#include "ProjectBleed/Systems/Combat/PBCombatComponent.h"
+#include "ProjectBleed/Libraries/CustomLogging.h"
 
 // Sets default values
 APBWeaponPickupBase::APBWeaponPickupBase()
@@ -12,8 +15,7 @@ APBWeaponPickupBase::APBWeaponPickupBase()
 	SphereOverlap = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Overlap"));
 	SetRootComponent(SphereOverlap);
 	SphereOverlap->SetGenerateOverlapEvents(true);
-	SphereOverlap->SetCollisionProfileName(TEXT("Trigger"));
-	SphereOverlap->OnComponentBeginOverlap.AddDynamic(this, &APBWeaponPickupBase::OnComponentOverlap);
+	SphereOverlap->SetCollisionProfileName(TEXT("Interactable"));
 	
 	WeaponStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
 	WeaponStaticMesh->SetCollisionProfileName(TEXT("NoCollision"));
@@ -36,21 +38,32 @@ void APBWeaponPickupBase::BeginPlay()
 	
 }
 
+int APBWeaponPickupBase::GetInteractionPriority_Implementation()
+{
+	return InteractionPriority;
+}
+
+void APBWeaponPickupBase::Interact_Implementation(AActor* Interactor)
+{
+	UE_LOG(LogPBWeapon, Log, TEXT("Interacted"));
+	//Makes sure that interaction component doesn't interact with this component again
+	InteractionPriority = -1;
+
+	if (UPBCombatComponent* CombatComponent = Interactor->GetComponentByClass<UPBCombatComponent>())
+	{
+		CombatComponent->GiveWeapon(WeaponToGive);
+	}
+	else
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid CombatComponent"));
+	}
+
+	Destroy();
+}
 // Called every frame
 void APBWeaponPickupBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-void APBWeaponPickupBase::OnComponentOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	//Only players can overlap.
-	//TODO: Make sure we use tags instead of casting
-
-	if (Cast<APBCharacter>(OtherActor))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Overlapped")));
-	}
 }
 

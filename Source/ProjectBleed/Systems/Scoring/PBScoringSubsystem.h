@@ -9,6 +9,8 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPBScoringSubsystem, Log, All);
 
+class UFMODEvent;
+
 UCLASS()
 class PROJECTBLEED_API UPBScoringSubsystem : public UTickableWorldSubsystem
 {
@@ -38,11 +40,11 @@ protected:
 
 	UPROPERTY()
 	int CurrentScoreMultiplier = 1;
+
+	UPROPERTY()
+	UFMODEvent* OnAccurateHitEvent;
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual TStatId GetStatId() const override;
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
-
-	UFUNCTION()
-	void SetupSubsystem();
 };

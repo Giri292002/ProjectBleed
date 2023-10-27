@@ -2,13 +2,26 @@
 
 
 #include "PBScoringSubsystem.h"
+
+#include "FMODEvent.h"
+#include "FMODBlueprintStatics.h"
+#include <ProjectBleed/Libraries/CustomLogging.h>
 #include "ProjectBleed/Systems/Audio/PBAudioDetectionSubsystem.h"
+#include <ProjectBleed/Settings/PBScoringSubsystemSettings.h>
+
 DEFINE_LOG_CATEGORY(LogPBScoringSubsystem);
 
 void UPBScoringSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	SetupSubsystem();
+
+	V_LOG(LogPBScoringSubsystem, TEXT("Initalized PB Scoring Subsystem"));
+
+	const UPBScoringSubsystemSettings* Settings = GetDefault<UPBScoringSubsystemSettings>();
+	if (IsValid(Settings))
+	{
+		OnAccurateHitEvent = Settings->OnAccurateHitEventPath.LoadSynchronous();
+	}
 }
 
 TStatId UPBScoringSubsystem::GetStatId() const
@@ -30,33 +43,40 @@ bool UPBScoringSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	return World->WorldType == EWorldType::Game  || World->WorldType == EWorldType::PIE;
 }
 
-void UPBScoringSubsystem::SetupSubsystem()
-{
-	UE_LOG(LogPBScoringSubsystem, Log, TEXT("Initalized PB Scoring Subsystem"));
-}
-
 void UPBScoringSubsystem::AddToScore(const UPBScoreData* InScore)
 {
 	if(!IsValid(InScore))
 	{
-		UE_LOG(LogPBScoringSubsystem, Error, TEXT("Incoming Score Data is NULL"));
+		V_LOG_ERROR(LogPBScoringSubsystem, TEXT("Incoming Score Data is NULL"));
 		return;
 	}
+
 	UPBAudioDetectionSubsystem* AudioDetectionSubsystem = GetWorld()->GetSubsystem<UPBAudioDetectionSubsystem>();
 	float OutAccuracy;
 	if(AudioDetectionSubsystem->WasOnBeat(OutAccuracy))
 	{		
-		UE_LOG(LogPBScoringSubsystem, Log, TEXT("Was on beat with accuracy: %f"), OutAccuracy);
+		V_LOGF(LogPBScoringSubsystem, TEXT("Was on beat with accuracy: %f"), OutAccuracy);
+
+		if(!IsValid(OnAccurateHitEvent))
+		{
+			V_LOG_ERROR(LogPBScoringSubsystem, TEXT("OnAccurateHitEvent is NULL"));
+			return;
+		}
+		else
+		{
+			//Play Accurate Hit Sound
+			//UFMODBlueprintStatics::PlayEvent2D(GetWorld(), OnAccurateHitEvent, true);
+		}		
 	}
 	else
 	{
-		UE_LOG(LogPBScoringSubsystem, Log, TEXT("Was NOT on beat with accuracy: %f"), OutAccuracy);
+		V_LOGF(LogPBScoringSubsystem, TEXT("Was NOT on beat with accuracy: %f"), OutAccuracy);
 	}
+
 	const float ScoreToAdd = FMath::Clamp(InScore->ScoreToAdd * OutAccuracy, 0, InScore->ScoreToAdd);
-	//This will later be modified to be reduced based on how delayed or how early you pressed
 	const int FinalAddedScore = FMath::TruncToInt(ScoreToAdd);
 	
 	BaseScore += FinalAddedScore;
 	CurrentScore = BaseScore * CurrentScoreMultiplier;
-	UE_LOG(LogPBScoringSubsystem, Log, TEXT("Current Score is: %i"), FinalAddedScore, CurrentScore);
+	V_LOGF(LogPBScoringSubsystem, TEXT("Current Score is: %i"), CurrentScore);
 }

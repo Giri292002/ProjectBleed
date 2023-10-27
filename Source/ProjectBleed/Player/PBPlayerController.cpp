@@ -7,6 +7,7 @@
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Math/Vector.h"
 #include "ProjectBleed/Input/PBInput.h"
 
 void APBPlayerController::OnPossess(APawn* InPawn)
@@ -24,6 +25,9 @@ void APBPlayerController::OnPossess(APawn* InPawn)
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, InPawn, TEXT("Move"));
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, InPawn, TEXT("Dash"));
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, InPawn, TEXT("Interact"));
+		EnhancedInputComponent->BindAction(StartFireAction, ETriggerEvent::Triggered, InPawn, TEXT("StartFire"));
+		EnhancedInputComponent->BindAction(StopFireAction, ETriggerEvent::Triggered, InPawn, TEXT("StopFire"));
 	}
 }
 
@@ -67,4 +71,21 @@ void APBPlayerController::UpdateControlRotation()
 {
 	SetControlRotation(UKismetMathLibrary::RInterpTo(GetControlRotation(), NewControlRotation,
 	                                                 UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
+}
+
+FVector APBPlayerController::GetMouseWorldLocation()
+{
+	FHitResult HitResult;
+	GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
+	return HitResult.ImpactPoint;
+}
+
+FVector APBPlayerController::GetMouseWorldDirection(const FVector& InWorldLocation)
+{
+	const FVector& MouseWorldLocation = GetMouseWorldLocation();
+	FVector MouseWorldDirection = FVector::Zero();
+	MouseWorldDirection = MouseWorldLocation - InWorldLocation;
+	MouseWorldDirection.Normalize();
+	MouseWorldDirection.Z = 0.f;
+	return MouseWorldDirection;
 }

@@ -15,12 +15,30 @@ class PROJECTBLEED_API APBPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+public:
+	//Returns normalized mouse world location
+	UFUNCTION()
+	FVector GetMouseWorldLocation();
+
+	//Returns the direction from the player to the mouse
+	UFUNCTION()
+	FVector GetMouseWorldDirection(const FVector& InWorldLocation);
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	UInputAction* MoveAction;
 
 	UPROPERTY(EditDefaultsOnly)
 	UInputAction* DashAction;
+
+	UPROPERTY(EditDefaultsOnly)
+	UInputAction* InteractAction;
+
+	UPROPERTY(EditDefaultsOnly)
+	UInputAction* StartFireAction;
+	
+	UPROPERTY(EditDefaultsOnly)
+	UInputAction* StopFireAction;
 
 	UPROPERTY()
 	FRotator NewControlRotation = FRotator::ZeroRotator;

@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "../PBWeaponBase.h"
+#include "../../Systems/Interaction/PBInteractableInterface.h"
 #include "Components/SphereComponent.h"
 
 #include "PBWeaponPickupBase.generated.h"
 
 UCLASS()
-class PROJECTBLEED_API APBWeaponPickupBase : public AActor
+class PROJECTBLEED_API APBWeaponPickupBase : public AActor, public IPBInteractableInterface
 {
 	GENERATED_BODY()
 	
@@ -30,17 +31,24 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* WeaponStaticMesh;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, Category = "Pickup | Weapon")
 	TSubclassOf<APBWeaponBase> WeaponToGive = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Pickup | Interaction")
+	int InteractionPriority = 0;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Pickup | Interaction")
+	int GetInteractionPriority();
+	virtual int GetInteractionPriority_Implementation() override;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Pickup | Interaction")
+	void Interact(AActor* Interactor);
+	virtual void Interact_Implementation(AActor* Interactor);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION()
-	void OnComponentOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
 };
