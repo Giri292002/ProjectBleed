@@ -52,6 +52,9 @@ class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
 
 		UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* CharacterFireAnimation;
+		
+		UPROPERTY(EditDefaultsOnly, Category= "Animation")
+		UAnimMontage* EmptyMagAnimation;
 
 		UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		TSubclassOf<UAnimInstance> AnimationLayer = nullptr;

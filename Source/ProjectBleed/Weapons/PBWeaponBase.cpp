@@ -3,7 +3,10 @@
 
 #include "PBWeaponBase.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "ProjectBleed/Player/PBPlayerController.h"
+#include "ProjectBleed/Weapons/Components/PBBulletHitReactionComponent.h"
 #include <ProjectBleed/Libraries/CustomLogging.h>
+#include <Kismet/KismetSystemLibrary.h>
 
 DEFINE_LOG_CATEGORY(LogPBWeapon)
 
@@ -18,6 +21,8 @@ APBWeaponBase::APBWeaponBase()
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetupAttachment(GetRootComponent());
+
+	BulletHitReactionComponent = CreateDefaultSubobject<UPBBulletHitReactionComponent>(TEXT("BulletHitReactionComponent"));
 
 	UAnimInstance* AnimInstance = LoadObject<UAnimInstance>(nullptr, TEXT("/Game/ProjectBleed/Animations/Weapons/ABP_Weapon_Base"));
 	if (AnimInstance)
@@ -41,40 +46,17 @@ void APBWeaponBase::BeginPlay()
 	if (!IsValid(PBOwnerCharacter))
 	{
 		UE_LOG(LogPBWeapon, Error, TEXT("Invalid owner"));
+		return;
 	}	
-}
 
-void APBWeaponBase::InternalFire()
-{
-	if (WeaponMesh->GetAnimInstance() && WeaponData->WeaponFireAnimation)
+	PBPlayerController = Cast<APBPlayerController>(PBOwnerCharacter->GetController());
+	if (!IsValid(PBPlayerController))
 	{
-		WeaponMesh->GetAnimInstance()->Montage_Play(WeaponData->WeaponFireAnimation);
-	}
-	else
-	{
-		V_LOG(LogPBWeapon, TEXT("Invalid WeaponFireAnimation"));
-	}
-	if (WeaponData->CharacterFireAnimation)
-	{
-		PBOwnerCharacter->PlayAnimMontage(WeaponData->CharacterFireAnimation);
-	}
-	else
-	{
-		V_LOG(LogPBWeapon, TEXT("Invalid CharacterFireAnimation"));
-	}
-}
-
-void APBWeaponBase::InternalBurstFire()
-{	
-	if (CurrentBurstCount + 1 >= WeaponData->BurstCount)
-	{
-		StopFire();
+		UE_LOG(LogPBWeapon, Error, TEXT("Invalid Player Controller"));
 		return;
 	}
 
-	CurrentBurstCount++;
-	InternalFire();
-	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &APBWeaponBase::InternalBurstFire, WeaponData->FireRate, false, 0.f);	
+	CurrentAmmo = WeaponData->MaxAmmo;
 }
 
 void APBWeaponBase::Equip()
@@ -113,6 +95,12 @@ void APBWeaponBase::UnEquip()
 
 void APBWeaponBase::Fire()
 {
+	if (HasAmmo() == false)
+	{
+		OnNoAmmo();
+		return;
+	}
+
 	switch (WeaponData->WeaponFireMode)
 	{
 		case EFireMode::SemiAuto:
@@ -137,9 +125,11 @@ void APBWeaponBase::Fire()
 		}
 	}
 
+	//Add Score
+
 	UPBScoringSubsystem* PBScoringSystem = GetWorld()->GetSubsystem<UPBScoringSubsystem>();
 
-	if(WeaponData->ScoreData != nullptr && PBScoringSystem != nullptr)
+	if (WeaponData->ScoreData != nullptr && PBScoringSystem != nullptr)
 	{
 		PBScoringSystem->AddToScore(WeaponData->ScoreData);
 	}
@@ -149,6 +139,86 @@ void APBWeaponBase::Fire()
 	}
 }
 
+void APBWeaponBase::InternalBurstFire()
+{
+	if (CurrentBurstCount + 1 >= WeaponData->BurstCount)
+	{
+		StopFire();
+		return;
+	}
+
+	CurrentBurstCount++;
+	InternalFire();
+	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &APBWeaponBase::InternalBurstFire, WeaponData->FireRate, false, 0.f);
+}
+
+void APBWeaponBase::InternalFire()
+{
+	if (CurrentAmmo <= 0)
+	{
+		OnNoAmmo();
+		return;
+	}
+
+	ReduceAmmo();
+
+	FHitResult HitResult;
+	PerformLineTrace(HitResult);
+
+	BulletHitReactionComponent->PlayImpactFX(HitResult);
+
+	VSCREENMSGF("Current Ammo: %i", CurrentAmmo);
+
+	if (WeaponMesh->GetAnimInstance() && WeaponData->WeaponFireAnimation)
+	{
+		WeaponMesh->GetAnimInstance()->Montage_Play(WeaponData->WeaponFireAnimation);
+	}
+	else
+	{
+		V_LOG(LogPBWeapon, TEXT("Invalid WeaponFireAnimation"));
+	}
+	if (WeaponData->CharacterFireAnimation)
+	{
+		PBOwnerCharacter->PlayAnimMontage(WeaponData->CharacterFireAnimation);
+	}
+	else
+	{
+		V_LOG(LogPBWeapon, TEXT("Invalid CharacterFireAnimation"));
+	}
+}
+
+void APBWeaponBase::OnNoAmmo()
+{
+	StopFire();
+
+	if (WeaponData->EmptyMagAnimation)
+	{
+		PBOwnerCharacter->PlayAnimMontage(WeaponData->EmptyMagAnimation);
+	}
+	else
+	{
+		V_LOG(LogPBWeapon, TEXT("Invalid EmptyMagAnimation"));
+	}
+}
+
+bool APBWeaponBase::PerformLineTrace(FHitResult& OutHitResult)
+{
+	FHitResult HitResult;
+	const FVector& StartLocation = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
+	FVector EndLocation = StartLocation + PBPlayerController->GetMouseWorldDirection(StartLocation) * WeaponData->WeaponRange;
+	FCollisionQueryParams CollisionQueryParams;
+	CollisionQueryParams.AddIgnoredActor(this);
+	CollisionQueryParams.AddIgnoredActor(PBOwnerCharacter);
+	CollisionQueryParams.bReturnPhysicalMaterial = true;
+
+	//Perform Line Trace
+	bool bLineTraceResult = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECollisionChannel::ECC_Visibility, CollisionQueryParams);
+	//DrawDebugLine(GetWorld(), StartLocation, EndLocation, HitResult.bBlockingHit ? FColor::Blue : FColor::Red, false, 5.0f, 0, 10.0f);
+	OutHitResult = HitResult;
+	return bLineTraceResult;
+}
+
+
 void APBWeaponBase::StopFire()
 {
 	if (FireTimerHandle.IsValid())
@@ -157,6 +227,18 @@ void APBWeaponBase::StopFire()
 	}
 
 	CurrentBurstCount = 0;
+}
+
+void APBWeaponBase::ReduceAmmo(int AmmoToReduce)
+{
+	CurrentAmmo -= AmmoToReduce;
+	CurrentAmmo = FMath::Clamp(CurrentAmmo, 0, WeaponData->MaxAmmo);
+}
+
+void APBWeaponBase::AddAmmo(int AmmoToAdd)
+{
+	CurrentAmmo += AmmoToAdd;
+	CurrentAmmo = FMath::Clamp(CurrentAmmo, 0, WeaponData->MaxAmmo);
 }
 
 // Called every frame

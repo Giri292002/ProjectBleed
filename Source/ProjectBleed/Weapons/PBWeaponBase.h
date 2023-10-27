@@ -11,6 +11,9 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPBWeapon, Log, All);
 
+class APBPlayerController;
+class UPBBulletHitReactionComponent;
+
 UCLASS()
 class PROJECTBLEED_API APBWeaponBase : public AActor
 {
@@ -21,6 +24,8 @@ public:
 	APBWeaponBase();
 
 protected:
+	UPROPERTY(EditDefaultsOnly)
+	UPBBulletHitReactionComponent* BulletHitReactionComponent = nullptr;
 
 	UPROPERTY(BlueprintReadOnly)	
 	APBCharacter* PBOwnerCharacter = nullptr;
@@ -34,11 +39,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Data")
 	UPBWeaponDataBase* WeaponData = nullptr;
 
+	UPROPERTY(VisibleAnywhere, Category = "ProjectBleed| Weapons | Data")
+	int CurrentAmmo = 0;
+
 	UPROPERTY()
 	FTimerHandle FireTimerHandle;
 
 	UPROPERTY()
 	int CurrentBurstCount = 0;
+
+	UPROPERTY()
+	APBPlayerController* PBPlayerController = nullptr;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -48,6 +59,12 @@ protected:
 
 	UFUNCTION()
 	void InternalBurstFire();
+
+	UFUNCTION()
+	void OnNoAmmo();
+
+	UFUNCTION()
+	bool PerformLineTrace(FHitResult& OutHitResult);
 	
 
 public:	
@@ -68,4 +85,29 @@ public:
 
 	UFUNCTION()
 	virtual void StopFire();
+
+	UFUNCTION()
+	int GetCurrentAmmo() const { return CurrentAmmo; }
+
+	//Returns the weapon data
+	UFUNCTION()
+	UPBWeaponDataBase* GetWeaponData() const { return WeaponData; }
+
+	UFUNCTION()
+	bool HasAmmo() const { return CurrentAmmo > 0; }
+
+	/**
+	* @brief Reduces the ammo by the specified amount 
+	* @param AmmoToReduce The amount of ammo to reduce
+	*/
+	UFUNCTION()
+	void ReduceAmmo(int AmmoToReduce = 1);
+
+	/**
+	* @brief Adds the ammo by the specified amount
+	* @param AmmoToAdd The amount of ammo to add
+	*/
+	UFUNCTION()
+	void AddAmmo(int AmmoToAdd = 1);
+
 };
