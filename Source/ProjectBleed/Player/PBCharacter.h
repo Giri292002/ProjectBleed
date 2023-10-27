@@ -74,5 +74,8 @@ public:
 	void Interact();
 
 	UFUNCTION()
-	void Fire();
+	void StartFire();
+
+	UFUNCTION()
+	void StopFire();
 };

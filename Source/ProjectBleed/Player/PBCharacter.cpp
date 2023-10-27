@@ -93,11 +93,20 @@ void APBCharacter::Interact()
 	InteractionComponent->Interact();
 }
 
-void APBCharacter::Fire()
+void APBCharacter::StartFire()
 {
 	if (!IsValid(CombatComponent))
 	{
 		V_LOG_ERROR(LogPBWeapon, "Invalid Combat Component");
 	}
 	CombatComponent->FireCurrentWeapon();
+}
+
+void APBCharacter::StopFire()
+{
+	if (!IsValid(CombatComponent))
+	{
+		V_LOG_ERROR(LogPBWeapon, "Invalid Combat Component");
+	}
+	CombatComponent->StopFireCurrentWeapon();
 }

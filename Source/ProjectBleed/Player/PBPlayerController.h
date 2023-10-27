@@ -35,7 +35,10 @@ protected:
 	UInputAction* InteractAction;
 
 	UPROPERTY(EditDefaultsOnly)
-	UInputAction* FireAction;
+	UInputAction* StartFireAction;
+	
+	UPROPERTY(EditDefaultsOnly)
+	UInputAction* StopFireAction;
 
 	UPROPERTY()
 	FRotator NewControlRotation = FRotator::ZeroRotator;
