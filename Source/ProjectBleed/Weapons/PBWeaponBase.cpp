@@ -6,6 +6,7 @@
 #include "ProjectBleed/Player/PBPlayerController.h"
 #include "ProjectBleed/Weapons/Components/PBBulletHitReactionComponent.h"
 #include <ProjectBleed/Libraries/CustomLogging.h>
+#include "ProjectBleed/Systems/Audio/PBAudioDetectionSubsystem.h"
 #include <Kismet/KismetSystemLibrary.h>
 
 DEFINE_LOG_CATEGORY(LogPBWeapon)
@@ -57,6 +58,18 @@ void APBWeaponBase::BeginPlay()
 	}
 
 	CurrentAmmo = WeaponData->MaxAmmo;
+
+	//Setup Fire Rate if using dynamic fire rate
+	if (WeaponData->bUseDynamicFireRate)
+	{
+		UPBAudioDetectionSubsystem* AudioDetectionSubsystem = GetWorld()->GetSubsystem<UPBAudioDetectionSubsystem>();
+		if (AudioDetectionSubsystem == nullptr)
+		{
+			V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AudioDetectionSubsystem"));
+			return;
+		}
+		WeaponData->FireRate = AudioDetectionSubsystem->GetBeatInterval(WeaponData->DynamicFireRateMode);
+	}
 }
 
 void APBWeaponBase::Equip()

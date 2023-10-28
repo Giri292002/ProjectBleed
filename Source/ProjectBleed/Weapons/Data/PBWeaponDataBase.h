@@ -5,21 +5,12 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "../../Systems/Scoring/PBScoreData.h"
+#include "../../PBProjectENUMS.h"
 #include "PBWeaponDataBase.generated.h"
 
 /**
  * 
  */
-
-UENUM(BlueprintType)
-enum class EFireMode : uint8
-{
-	SemiAuto, //Fires once per click
-	FullAuto, //Fires while the mouse is held down
-	Burst //Fires a set amount of bullets per click
-};
-	
-
 UCLASS()
 class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
 {
@@ -35,7 +26,13 @@ class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
 		UPROPERTY(EditDefaultsOnly, Category = "Default", meta = (MinClamp = 0))
 		int WeaponDamage = 10;
 
-		UPROPERTY(EditDefaultsOnly, Category = "Default", meta = (MinClamp = 0.f, EditCondition = "WeaponFireMode == EFireMode::Burst || WeaponFireMode == EFireMode::FullAuto", EditConditionHides))
+		UPROPERTY(EditDefaultsOnly, Category = "Default")
+		bool bUseDynamicFireRate = false;
+
+		UPROPERTY(EditDefaultsOnly, Category = "Default", meta = (EditCondition = "bUseDynamicFireRate", EditConditionHides))
+		EBeatType DynamicFireRateMode = EBeatType::Half;
+
+		UPROPERTY(EditDefaultsOnly, Category = "Default", meta = (MinClamp = 0.f, EditCondition = "bUseDynamicFireRate == false && (WeaponFireMode == EFireMode::Burst || WeaponFireMode == EFireMode::FullAuto)", EditConditionHides))
 		float FireRate = 0.1f;
 
 		UPROPERTY(EditDefaultsOnly, Category = "Default", meta = (MinClamp = 0, EditCondition = "WeaponFireMode == EFireMode::Burst", EditConditionHides))
