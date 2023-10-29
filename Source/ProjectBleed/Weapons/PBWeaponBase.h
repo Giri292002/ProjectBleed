@@ -51,6 +51,9 @@ protected:
 	UPROPERTY()
 	APBPlayerController* PBPlayerController = nullptr;
 
+	UPROPERTY()
+	FTimerHandle BurstFireTimerHandle;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

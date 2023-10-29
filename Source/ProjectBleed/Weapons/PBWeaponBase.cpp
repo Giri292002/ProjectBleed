@@ -128,7 +128,13 @@ void APBWeaponBase::Fire()
 		}
 		case EFireMode::Burst:
 		{
-			InternalBurstFire();
+			// Check if it's time to start a new burst
+			if (CurrentBurstCount <= 0)
+			{
+				CurrentBurstCount = WeaponData->BurstCount; // Set the number of shots in the burst
+				GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &APBWeaponBase::InternalBurstFire, WeaponData->FireRate, true, 0.f);
+			}
+
 			break;
 		}
 		default:
@@ -154,15 +160,16 @@ void APBWeaponBase::Fire()
 
 void APBWeaponBase::InternalBurstFire()
 {
-	if (CurrentBurstCount + 1 >= WeaponData->BurstCount)
+	if (CurrentAmmo <= 0 || CurrentBurstCount <= 0)
 	{
 		StopFire();
+		// Trigger InternalBurstFire to start a new burst
+		InternalBurstFire();
 		return;
 	}
 
-	CurrentBurstCount++;
+	CurrentBurstCount--;
 	InternalFire();
-	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &APBWeaponBase::InternalBurstFire, WeaponData->FireRate, false, 0.f);
 }
 
 void APBWeaponBase::InternalFire()
@@ -237,6 +244,10 @@ void APBWeaponBase::StopFire()
 	if (FireTimerHandle.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+	}
+	if (BurstFireTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(BurstFireTimerHandle);
 	}
 
 	CurrentBurstCount = 0;
