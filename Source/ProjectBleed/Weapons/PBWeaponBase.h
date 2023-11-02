@@ -24,9 +24,6 @@ public:
 	APBWeaponBase();
 
 protected:
-	UPROPERTY(EditDefaultsOnly)
-	UPBBulletHitReactionComponent* BulletHitReactionComponent = nullptr;
-
 	UPROPERTY(BlueprintReadOnly)	
 	APBCharacter* PBOwnerCharacter = nullptr;
 
@@ -68,7 +65,12 @@ protected:
 
 	UFUNCTION()
 	bool PerformLineTrace(FHitResult& OutHitResult);
-	
+
+	/**
+	* @brief Spawns a bullet projectile
+	*/
+	UFUNCTION()
+	void SpawnBulletProjectile(const FHitResult& InHitResult);
 
 public:	
 	// Called every frame

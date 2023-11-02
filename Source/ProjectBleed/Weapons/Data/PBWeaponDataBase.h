@@ -4,13 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "../../Systems/Scoring/PBScoreData.h"
 #include "../../PBProjectENUMS.h"
 #include "PBWeaponDataBase.generated.h"
 
-/**
- * 
- */
+class APBProjectile;
+class UPBScoreData;
+
 UCLASS()
 class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
 {
@@ -38,8 +37,14 @@ class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
 		UPROPERTY(EditDefaultsOnly, Category = "Default", meta = (MinClamp = 0, EditCondition = "WeaponFireMode == EFireMode::Burst", EditConditionHides))
 		int BurstCount = 0;
 
+		UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+		TSubclassOf<APBProjectile> ProjectileClass = nullptr;
+
 		UPROPERTY(EditDefaultsOnly, Category = "Default")
 		float WeaponRange = 1000.f;	
+
+		UPROPERTY(EditDefaultsOnly, Category = "Default")
+		float ProjectileSpeed = 4000.f;
 
 		UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* EquipAnimation;
