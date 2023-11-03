@@ -3,6 +3,7 @@
 
 #include "PBWeaponBase.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -20,11 +21,15 @@ APBWeaponBase::APBWeaponBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	Root = CreateDefaultSubobject<USphereComponent>(TEXT("Root"));
 	SetRootComponent(Root);
+	Root->SetCollisionProfileName(TEXT("PhysicsActor"));
+	Root->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetupAttachment(GetRootComponent());
+
+	ThrowableObjectComponent = CreateDefaultSubobject<UPBThrowableObjectComponent>(TEXT("ThrowableObjectComponent"));
 
 	UAnimInstance* AnimInstance = LoadObject<UAnimInstance>(nullptr, TEXT("/Game/ProjectBleed/Animations/Weapons/ABP_Weapon_Base"));
 	if (AnimInstance)
@@ -103,6 +108,8 @@ void APBWeaponBase::UnEquip()
 		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
 		return;
 	}
+
+	Root->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	PBOwnerCharacter->GetMesh()->UnlinkAnimClassLayers(WeaponData->AnimationLayer);
 }
@@ -277,8 +284,8 @@ void APBWeaponBase::SpawnBulletProjectile(const FHitResult& InHitResult)
 		return;
 	}
 
-	const FVector& StartLocation = InHitResult.TraceStart + FVector(100.f, 0.f, 0.f);
 	const FRotator& ShootDirection = UKismetMathLibrary::FindLookAtRotation(InHitResult.TraceStart, InHitResult.ImpactPoint);
+	const FVector& StartLocation = InHitResult.TraceStart + (ShootDirection.Vector() * 100.f);
 
 	const FTransform& SpawnTransform = FTransform(ShootDirection, StartLocation);
 	AActor* SpawnedProjectile = GetWorld()->SpawnActorDeferred<APBProjectile>(WeaponData->ProjectileClass.Get(), SpawnTransform, this, PBOwnerCharacter, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);

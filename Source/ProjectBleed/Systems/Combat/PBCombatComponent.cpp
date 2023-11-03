@@ -74,8 +74,6 @@ void UPBCombatComponent::RemoveWeapon()
 	}
 
 	CurrentWeapon->UnEquip();
-	//TODO: Dont destroy, just drop the weapon
-	CurrentWeapon->Destroy();
 	CurrentWeapon = nullptr;
 }
 

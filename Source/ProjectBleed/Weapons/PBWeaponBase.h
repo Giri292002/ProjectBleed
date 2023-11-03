@@ -3,16 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/PBWeaponDataBase.h"
 #include "GameFramework/Actor.h"
 #include "ProjectBleed/Systems/Scoring/PBScoringSubsystem.h"
-#include "Data/PBWeaponDataBase.h"
 #include "ProjectBleed/Player/PBCharacter.h"
+#include "ProjectBleed/Systems/PBThrowableObjectComponent.h"
 #include "PBWeaponBase.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPBWeapon, Log, All);
 
 class APBPlayerController;
 class UPBBulletHitReactionComponent;
+class USphereComponent;
+class UPBThrowableObjectComponent;
 
 UCLASS()
 class PROJECTBLEED_API APBWeaponBase : public AActor
@@ -28,10 +31,13 @@ protected:
 	APBCharacter* PBOwnerCharacter = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Root")
-	USceneComponent* Root = nullptr;
+	USphereComponent* Root = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Weapon")
 	USkeletalMeshComponent* WeaponMesh;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed | Weapons  | Weapon")
+	UPBThrowableObjectComponent* ThrowableObjectComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Data")
 	UPBWeaponDataBase* WeaponData = nullptr;

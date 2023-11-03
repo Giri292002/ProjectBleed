@@ -53,14 +53,14 @@
 #define VSCREENMSGF(Param1,Param2) (GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *(JOYSTR_CUR_CLASS_LINE + ": " + Param1 + " " + FString::SanitizeFloat(Param2))) )
 
 //UE LOG!
-#define V_LOG(LogCat, Param1) 		UE_LOG(LogCat,Warning,TEXT("%s: %s"), *JOYSTR_CUR_CLASS_LINE, *FString(Param1))
+#define V_LOG(LogCat, Param1) 		UE_LOG(LogCat,Log,TEXT("%s: %s"), *JOYSTR_CUR_CLASS_LINE, *FString(Param1))
 
 #define V_LOG_ERROR(LogCat, Param1) 		UE_LOG(LogCat,Error,TEXT("%s: %s"), *JOYSTR_CUR_CLASS_LINE, *FString(Param1))
 
-#define V_LOG2(LogCat, Param1,Param2) 	UE_LOG(LogCat,Warning,TEXT("%s: %s %s"), *JOYSTR_CUR_CLASS_LINE, *FString(Param1),*FString(Param2))
+#define V_LOG2(LogCat, Param1,Param2) 	UE_LOG(LogCat,Log,TEXT("%s: %s %s"), *JOYSTR_CUR_CLASS_LINE, *FString(Param1),*FString(Param2))
 
-#define V_LOGF(LogCat, Param1,Param2) 	UE_LOG(LogCat,Warning,TEXT("%s: %s %f"), *JOYSTR_CUR_CLASS_LINE, *FString(Param1),Param2)
+#define V_LOGF(LogCat, Param1,Param2) 	UE_LOG(LogCat,Log,TEXT("%s: %s %f"), *JOYSTR_CUR_CLASS_LINE, *FString(Param1),Param2)
 
 #define V_LOGF_ERROR(LogCat, Param1,Param2) 	UE_LOG(LogCat,Error,TEXT("%s: %s %f"), *JOYSTR_CUR_CLASS_LINE, *FString(Param1),Param2)
 
-#define V_LOGM(LogCat, FormatString , ...) UE_LOG(LogCat,Warning,TEXT("%s: %s"), 	*JOYSTR_CUR_CLASS_LINE, *FString::Printf(TEXT(FormatString), ##__VA_ARGS__ ) )
+#define V_LOGM(LogCat, FormatString , ...) UE_LOG(LogCat,Log,TEXT("%s: %s"), 	*JOYSTR_CUR_CLASS_LINE, *FString::Printf(TEXT(FormatString), ##__VA_ARGS__ ) )

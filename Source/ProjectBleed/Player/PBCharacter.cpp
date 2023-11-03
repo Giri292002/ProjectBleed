@@ -9,6 +9,7 @@
 #include "ProjectBleed/Systems/Locomotion/PBDashComponent.h"
 #include "ProjectBleed/Systems/Interaction/PBInteractionComponent.h"
 #include "ProjectBleed/Systems/Combat/PBCombatComponent.h"
+#include "ProjectBleed/Systems/PBThrowableObjectComponent.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
 
 DEFINE_LOG_CATEGORY(LogPBCharacter);
@@ -89,6 +90,14 @@ void APBCharacter::Interact()
 	if (!IsValid(InteractionComponent))
 	{
 		VSCREENMSG("Invalid Interaction Component");
+	}
+	if (CombatComponent->HasWeapon())
+	{
+		//Need to cache this now because the weapon will be nullptr after removed
+		APBWeaponBase* WeaponInHand = CombatComponent->GetCurrentWeapon();
+		CombatComponent->RemoveWeapon();
+		WeaponInHand->GetComponentByClass<UPBThrowableObjectComponent>()->Throw();
+		return;
 	}
 	InteractionComponent->Interact();
 }

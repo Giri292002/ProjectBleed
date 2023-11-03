@@ -48,6 +48,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StopFireCurrentWeapon();
 
+	//Check if the character has a weapon
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	bool HasWeapon() const { return CurrentWeapon != nullptr; }
+
+	//Returns the current weapon
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	APBWeaponBase* GetCurrentWeapon() const { return CurrentWeapon; }
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

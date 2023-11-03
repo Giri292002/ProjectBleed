@@ -6,6 +6,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "PBInteractableInterface.h"
 #include "ProjectBleed/Player/PBCharacter.h"
+#include "ProjectBleed/Weapons/PBWeaponBase.h"
 
 DEFINE_LOG_CATEGORY(LogPBInteractionComponent);
 
