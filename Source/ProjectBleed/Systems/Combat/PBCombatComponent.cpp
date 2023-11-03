@@ -74,6 +74,7 @@ void UPBCombatComponent::RemoveWeapon()
 	}
 
 	CurrentWeapon->UnEquip();
+	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	CurrentWeapon = nullptr;
 }
 

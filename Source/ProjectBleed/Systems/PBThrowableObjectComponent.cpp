@@ -43,7 +43,7 @@ void UPBThrowableObjectComponent::Throw()
 
 	const FVector& ShootDirection = Cast<APBPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetMouseWorldDirection(GetOwner()->GetActorLocation());
 
-	Velocity = GetOwner()->GetActorForwardVector() * InitialSpeed;
+	Velocity = ShootDirection * InitialSpeed;
 	Activate(true);
 }
 
