@@ -14,8 +14,6 @@ DECLARE_LOG_CATEGORY_EXTERN(LogPBWeapon, Log, All);
 
 class APBPlayerController;
 class UPBBulletHitReactionComponent;
-class UCapsuleComponent;
-class USceneComponent;
 class UPBThrowableObjectComponent;
 
 UCLASS()
@@ -30,12 +28,6 @@ public:
 protected:
 	UPROPERTY(BlueprintReadOnly)	
 	APBCharacter* PBOwnerCharacter = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Root")
-	USceneComponent* Root = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Root")
-	UCapsuleComponent* CapsuleCollision = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Weapon")
 	USkeletalMeshComponent* WeaponMesh;

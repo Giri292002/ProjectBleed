@@ -61,7 +61,7 @@ void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass)
 
 	const FAttachmentTransformRules& AttachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
 
-	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("weapon_r")));
+	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("weapon_r_socket")));
 	SpawnedPBWeapon->Equip();
 }
 

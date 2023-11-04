@@ -3,8 +3,7 @@
 
 #include "PBWeaponBase.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/SceneComponent.h"
-#include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -22,19 +21,12 @@ APBWeaponBase::APBWeaponBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	SetRootComponent(Root);
-
-	CapsuleCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleCollision"));
-	CapsuleCollision->SetupAttachment(GetRootComponent());
-	CapsuleCollision->SetCollisionProfileName(TEXT("PhysicsActor"));
-	CapsuleCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->SetupAttachment(CapsuleCollision);
+	SetRootComponent(WeaponMesh);
+	WeaponMesh->SetCollisionProfileName(TEXT("Weapon"));
 
 	ThrowableObjectComponent = CreateDefaultSubobject<UPBThrowableObjectComponent>(TEXT("ThrowableObjectComponent"));
-	ThrowableObjectComponent->SetUpdatedComponent(CapsuleCollision);
+	ThrowableObjectComponent->SetUpdatedComponent(WeaponMesh);
 
 	UAnimInstance* AnimInstance = LoadObject<UAnimInstance>(nullptr, TEXT("/Game/ProjectBleed/Animations/Weapons/ABP_Weapon_Base"));
 	if (AnimInstance)
@@ -114,7 +106,7 @@ void APBWeaponBase::UnEquip()
 		return;
 	}
 
-	CapsuleCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	PBOwnerCharacter->GetMesh()->UnlinkAnimClassLayers(WeaponData->AnimationLayer);
 }

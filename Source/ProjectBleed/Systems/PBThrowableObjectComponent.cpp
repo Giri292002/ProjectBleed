@@ -3,6 +3,8 @@
 
 #include "PBThrowableObjectComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
 #include "ProjectBleed/Player/PBPlayerController.h"
 
@@ -39,6 +41,20 @@ void UPBThrowableObjectComponent::Throw()
 	if (GetOwner()->GetParentActor())
 	{
 		GetOwner()->GetParentActor()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	}
+
+	if (ThrowEffect == nullptr)
+	{
+		V_LOG_ERROR(LogPBThrowableComponent, TEXT("No Throw Effect"));
+		return;
+	}
+
+	UNiagaraComponent* SpawnedSystem = UNiagaraFunctionLibrary::SpawnSystemAttached(ThrowEffect, GetOwner()->GetRootComponent(), NAME_None, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true, true, ENCPoolMethod::AutoRelease, true);
+
+	if (SpawnedSystem == nullptr)
+	{
+		V_LOG_ERROR(LogPBThrowableComponent, TEXT("Failed to spawn throw effect"));
+		return;
 	}
 
 	const FVector& ShootDirection = Cast<APBPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetMouseWorldDirection(GetOwner()->GetActorLocation());

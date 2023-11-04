@@ -2,6 +2,8 @@
 
 
 #include "PBCharacter.h"
+
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
@@ -19,6 +21,8 @@ APBCharacter::APBCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	SpringArmComponent->SetupAttachment(RootComponent);

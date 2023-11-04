@@ -8,6 +8,7 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPBThrowableComponent, Log, All)
 
+class UNiagaraSystem;
 //Attach this component to any actor that needs to be thrown
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTBLEED_API UPBThrowableObjectComponent : public UProjectileMovementComponent
@@ -17,6 +18,9 @@ class PROJECTBLEED_API UPBThrowableObjectComponent : public UProjectileMovementC
 public:	
 	// Sets default values for this component's properties
 	UPBThrowableObjectComponent();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectBleed| FX")
+	UNiagaraSystem* ThrowEffect;
 
 	//Throws the object this component is attached to
 	UFUNCTION(BlueprintCallable)
