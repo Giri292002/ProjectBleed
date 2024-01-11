@@ -27,6 +27,11 @@ public:
 	void Throw();
 
 protected:
+
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	//Called after Throw and checks periodically to see if the object has stopped moving
+	UFUNCTION()
+	virtual void OnStopped(const FHitResult& ImpactResult);
 };

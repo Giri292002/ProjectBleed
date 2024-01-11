@@ -7,14 +7,13 @@
 #include "GameFramework/Actor.h"
 #include "ProjectBleed/Systems/Scoring/PBScoringSubsystem.h"
 #include "ProjectBleed/Player/PBCharacter.h"
-#include "ProjectBleed/Systems/PBThrowableObjectComponent.h"
 #include "PBWeaponBase.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPBWeapon, Log, All);
 
 class APBPlayerController;
 class UPBBulletHitReactionComponent;
-class UPBThrowableObjectComponent;
+class UPBThrowableWeaponComponent;
 
 UCLASS()
 class PROJECTBLEED_API APBWeaponBase : public AActor
@@ -33,7 +32,7 @@ protected:
 	USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed | Weapons  | Weapon")
-	UPBThrowableObjectComponent* ThrowableObjectComponent = nullptr;
+	UPBThrowableWeaponComponent* ThrowableWeaponomponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Data")
 	UPBWeaponDataBase* WeaponData = nullptr;

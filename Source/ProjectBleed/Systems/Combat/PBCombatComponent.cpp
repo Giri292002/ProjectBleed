@@ -1,6 +1,7 @@
 // All Rights belong to Studio WASD 2023
 
 #include "PBCombatComponent.h"
+#include "ProjectBleed/Weapons/Components/PBThrowableWeaponComponent.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
 
 // Sets default values for this component's properties
@@ -98,6 +99,13 @@ void UPBCombatComponent::StopFireCurrentWeapon()
 	}
 
 	CurrentWeapon->StopFire();
+}
+
+void UPBCombatComponent::ThrowWeapon()
+{
+	APBWeaponBase* WeaponInHand = GetCurrentWeapon();
+	RemoveWeapon();
+	WeaponInHand->GetComponentByClass<UPBThrowableWeaponComponent>()->Throw();
 }
 
 // Called every frame

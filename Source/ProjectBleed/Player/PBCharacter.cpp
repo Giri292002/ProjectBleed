@@ -98,9 +98,7 @@ void APBCharacter::Interact()
 	if (CombatComponent->HasWeapon())
 	{
 		//Need to cache this now because the weapon will be nullptr after removed
-		APBWeaponBase* WeaponInHand = CombatComponent->GetCurrentWeapon();
-		CombatComponent->RemoveWeapon();
-		WeaponInHand->GetComponentByClass<UPBThrowableObjectComponent>()->Throw();
+		CombatComponent->ThrowWeapon();
 		return;
 	}
 	InteractionComponent->Interact();

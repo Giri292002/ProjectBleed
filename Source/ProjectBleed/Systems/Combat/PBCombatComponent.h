@@ -48,6 +48,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StopFireCurrentWeapon();
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ThrowWeapon();
+
 	//Check if the character has a weapon
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	bool HasWeapon() const { return CurrentWeapon != nullptr; }

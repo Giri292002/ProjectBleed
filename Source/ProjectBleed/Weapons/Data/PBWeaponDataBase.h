@@ -9,6 +9,7 @@
 
 class APBProjectile;
 class UPBScoreData;
+class APBWeaponPickupBase;
 
 UCLASS()
 class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
@@ -45,6 +46,9 @@ class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
 
 		UPROPERTY(EditDefaultsOnly, Category = "Default")
 		float ProjectileSpeed = 4000.f;
+
+		UPROPERTY(EditDefaultsOnly, Category = "Default")
+		TSubclassOf<APBWeaponPickupBase> WeaponPickupToSpawn;
 
 		UPROPERTY(EditDefaultsOnly, Category = "Animation")
 		UAnimMontage* EquipAnimation;

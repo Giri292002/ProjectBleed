@@ -11,6 +11,7 @@
 #include "ProjectBleed/Player/PBPlayerController.h"
 #include "ProjectBleed/Systems/Audio/PBAudioDetectionSubsystem.h"
 #include "ProjectBleed/Weapons/Components/PBBulletHitReactionComponent.h"
+#include "ProjectBleed/Weapons/Components/PBThrowableWeaponComponent.h"
 #include "ProjectBleed/Weapons/PBProjectile.h"
 
 DEFINE_LOG_CATEGORY(LogPBWeapon)
@@ -25,8 +26,8 @@ APBWeaponBase::APBWeaponBase()
 	SetRootComponent(WeaponMesh);
 	WeaponMesh->SetCollisionProfileName(TEXT("Weapon"));
 
-	ThrowableObjectComponent = CreateDefaultSubobject<UPBThrowableObjectComponent>(TEXT("ThrowableObjectComponent"));
-	ThrowableObjectComponent->SetUpdatedComponent(WeaponMesh);
+	ThrowableWeaponomponent = CreateDefaultSubobject<UPBThrowableWeaponComponent>(TEXT("ThrowableWeaponomponent"));
+	ThrowableWeaponomponent->SetUpdatedComponent(WeaponMesh);
 
 	UAnimInstance* AnimInstance = LoadObject<UAnimInstance>(nullptr, TEXT("/Game/ProjectBleed/Animations/Weapons/ABP_Weapon_Base"));
 	if (AnimInstance)

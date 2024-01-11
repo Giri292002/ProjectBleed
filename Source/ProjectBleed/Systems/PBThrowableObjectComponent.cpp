@@ -36,8 +36,8 @@ void UPBThrowableObjectComponent::Throw()
 		V_LOG_ERROR(LogPBThrowableComponent, TEXT("Throwable Object Component has no owner"));
 		return;
 	}
-	//If the object is attached to another actor, detach it
 
+	//If the object is attached to another actor, detach it
 	if (GetOwner()->GetParentActor())
 	{
 		GetOwner()->GetParentActor()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
@@ -49,7 +49,7 @@ void UPBThrowableObjectComponent::Throw()
 		return;
 	}
 
-	UNiagaraComponent* SpawnedSystem = UNiagaraFunctionLibrary::SpawnSystemAttached(ThrowEffect, GetOwner()->GetRootComponent(), NAME_None, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true, true, ENCPoolMethod::AutoRelease, true);
+	const UNiagaraComponent* SpawnedSystem = UNiagaraFunctionLibrary::SpawnSystemAttached(ThrowEffect, GetOwner()->GetRootComponent(), NAME_None, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true, true, ENCPoolMethod::AutoRelease, true);
 
 	if (SpawnedSystem == nullptr)
 	{
@@ -61,5 +61,13 @@ void UPBThrowableObjectComponent::Throw()
 
 	Velocity = ShootDirection * InitialSpeed;
 	Activate(true);
+
+	OnProjectileStop.AddDynamic(this, &UPBThrowableObjectComponent::OnStopped);
+}
+
+void UPBThrowableObjectComponent::OnStopped(const FHitResult& ImpactResult)
+{
+	V_LOG(LogPBThrowableComponent, TEXT("Stopped Moving"));
+	DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(), 200.f, 12, FColor::Green);
 }
 
