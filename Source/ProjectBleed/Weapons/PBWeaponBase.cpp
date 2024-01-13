@@ -61,7 +61,13 @@ void APBWeaponBase::BeginPlay()
 		return;
 	}
 
-	CurrentAmmo = WeaponData->MaxAmmo;
+	//Only setup starting ammo to max ammo if no override has been provided.
+	if (!bOverrideDefaultAmmoCount)
+	{
+		CurrentAmmo = WeaponData->MaxAmmo;
+	}
+
+	V_LOGF(LogPBWeapon, TEXT("Current Ammo is:"), GetCurrentAmmo());
 
 	//Setup Fire Rate if using dynamic fire rate
 	if (WeaponData->bUseDynamicFireRate)
@@ -78,25 +84,23 @@ void APBWeaponBase::BeginPlay()
 
 void APBWeaponBase::Equip()
 {	
-	if (WeaponData == nullptr)
+	if (!ensureAlwaysMsgf(WeaponData, TEXT("Invalid WeaponData")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid WeaponData"));
 		return;
 	}
 
-	if (WeaponData->AnimationLayer == nullptr)
+	if (!ensureAlwaysMsgf(WeaponData->AnimationLayer, TEXT("Invalid AnimationLayer")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
 		return;
 	}
 
-	if (WeaponData->EquipAnimation == nullptr)
-	{
-		V_LOG(LogPBWeapon, TEXT("Invalid EquipAnimation"));
+	if (!ensureAlwaysMsgf(WeaponData->EquipAnimation, TEXT("Invalid EquipAnimation")))
+	{		
+		return;
 	}
 
-	PBOwnerCharacter->GetMesh()->LinkAnimClassLayers(WeaponData->AnimationLayer);
-	PBOwnerCharacter->PlayAnimMontage(WeaponData->EquipAnimation);
+	GetPBOwner()->GetMesh()->LinkAnimClassLayers(WeaponData->AnimationLayer);
+	GetPBOwner()->PlayAnimMontage(WeaponData->EquipAnimation);
 }
 
 void APBWeaponBase::UnEquip()
@@ -255,6 +259,32 @@ void APBWeaponBase::StopFire()
 	}
 
 	CurrentBurstCount = 0;
+}
+
+void APBWeaponBase::OverrideDefaultCurrentAmmoCount(const int InCurrentAmmo)
+{
+	bOverrideDefaultAmmoCount = true;
+	SetCurrentAmmo(InCurrentAmmo);
+}
+
+UPBWeaponDataBase* APBWeaponBase::GetWeaponData() const
+{
+	if (!ensureAlwaysMsgf(WeaponData, TEXT("Weapon Data is Invalid")))
+	{
+		return nullptr;
+	}
+
+	return WeaponData;
+}
+
+APBCharacter* APBWeaponBase::GetPBOwner()
+{
+	if (!ensureAlwaysMsgf(PBOwnerCharacter, TEXT("PBOwnerCharacter is null")))
+	{
+		return nullptr;
+	}
+	
+	return PBOwnerCharacter;
 }
 
 void APBWeaponBase::ReduceAmmo(int AmmoToReduce)

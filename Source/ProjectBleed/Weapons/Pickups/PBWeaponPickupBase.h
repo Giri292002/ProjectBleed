@@ -37,6 +37,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Pickup | Interaction")
 	int InteractionPriority = 0;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Pickup | Weapon | Data")
+	int CurrentAmmo;
+
+	//Dont initialize current ammo from weapon data instead use the one we manually provide
+	UPROPERTY(EditDefaultsOnly, Category = "Pickup | Weapon | Data")
+	bool bOverrideDefaultAmmoCount = false;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -49,6 +56,9 @@ protected:
 	virtual void Interact_Implementation(AActor* Interactor);
 
 public:	
+	UFUNCTION()
+	void OverrideDefaultCurrentAmmoCount(int InCurrentAmmo);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 };

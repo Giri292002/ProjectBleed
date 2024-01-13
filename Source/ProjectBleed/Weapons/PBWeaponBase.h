@@ -40,6 +40,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "ProjectBleed| Weapons | Data")
 	int CurrentAmmo = 0;
 
+	UPROPERTY(VisibleAnywhere, Category = "ProjectBleed| Weapons | Data")
+	bool bOverrideDefaultAmmoCount = false;
+
 	UPROPERTY()
 	FTimerHandle FireTimerHandle;
 
@@ -95,9 +98,18 @@ public:
 	UFUNCTION()
 	int GetCurrentAmmo() const { return CurrentAmmo; }
 
+	UFUNCTION()
+	void SetCurrentAmmo(const int InCurrentAmmo) { CurrentAmmo = InCurrentAmmo; }
+
+	UFUNCTION()
+	void OverrideDefaultCurrentAmmoCount(const int InCurrentAmmo);
+
+	UFUNCTION()
+	APBCharacter* GetPBOwner();
+
 	//Returns the weapon data
 	UFUNCTION()
-	UPBWeaponDataBase* GetWeaponData() const { return WeaponData; }
+	UPBWeaponDataBase* GetWeaponData() const;
 
 	UFUNCTION()
 	bool HasAmmo() const { return CurrentAmmo > 0; }

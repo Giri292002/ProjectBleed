@@ -4,6 +4,7 @@
 #include "PBThrowableWeaponComponent.h"
 #include "ProjectBleed/Weapons/PBWeaponBase.h"
 #include "ProjectBleed/Weapons/Pickups/PBWeaponPickupBase.h"
+#include "ProjectBleed/Libraries/CustomLogging.h"
 
 void UPBThrowableWeaponComponent::OnStopped(const FHitResult& Imapct)
 {
@@ -13,6 +14,13 @@ void UPBThrowableWeaponComponent::OnStopped(const FHitResult& Imapct)
 		return;
 	}
 	
+	if (WeaponOwner->GetCurrentAmmo() <= 0)
+	{
+		V_LOG(LogPBThrowableComponent, TEXT("No Ammo, no need to spawn pickup"));
+		WeaponOwner->Destroy();
+		return;
+	}
+
 	TSubclassOf<APBWeaponPickupBase> WeaponPickupToSpawn = WeaponOwner->GetWeaponData()->WeaponPickupToSpawn;
 	
 	if (!ensureAlwaysMsgf(WeaponPickupToSpawn, TEXT("No Weapon Pickup Spawn class defined in weapon data")))
@@ -26,7 +34,7 @@ void UPBThrowableWeaponComponent::OnStopped(const FHitResult& Imapct)
 		return;
 	}
 	
-	//TODO: Add current bullet info to pickups
+	SpawnedPickup->OverrideDefaultCurrentAmmoCount(WeaponOwner->GetCurrentAmmo());
 
 	SpawnedPickup->FinishSpawning(WeaponOwner->GetTransform());
 
