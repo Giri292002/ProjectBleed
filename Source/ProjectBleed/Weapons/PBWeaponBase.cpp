@@ -3,10 +3,16 @@
 
 #include "PBWeaponBase.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "ProjectBleed/Libraries/CustomLogging.h"
 #include "ProjectBleed/Player/PBPlayerController.h"
+#include "ProjectBleed/Systems/Audio/PBAudioDetectionSubsystem.h"
 #include "ProjectBleed/Weapons/Components/PBBulletHitReactionComponent.h"
-#include <ProjectBleed/Libraries/CustomLogging.h>
-#include <Kismet/KismetSystemLibrary.h>
+#include "ProjectBleed/Weapons/Components/PBThrowableWeaponComponent.h"
+#include "ProjectBleed/Weapons/PBProjectile.h"
 
 DEFINE_LOG_CATEGORY(LogPBWeapon)
 
@@ -16,13 +22,12 @@ APBWeaponBase::APBWeaponBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	SetRootComponent(Root);
-
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->SetupAttachment(GetRootComponent());
+	SetRootComponent(WeaponMesh);
+	WeaponMesh->SetCollisionProfileName(TEXT("Weapon"));
 
-	BulletHitReactionComponent = CreateDefaultSubobject<UPBBulletHitReactionComponent>(TEXT("BulletHitReactionComponent"));
+	ThrowableWeaponomponent = CreateDefaultSubobject<UPBThrowableWeaponComponent>(TEXT("ThrowableWeaponomponent"));
+	ThrowableWeaponomponent->SetUpdatedComponent(WeaponMesh);
 
 	UAnimInstance* AnimInstance = LoadObject<UAnimInstance>(nullptr, TEXT("/Game/ProjectBleed/Animations/Weapons/ABP_Weapon_Base"));
 	if (AnimInstance)
@@ -56,30 +61,46 @@ void APBWeaponBase::BeginPlay()
 		return;
 	}
 
-	CurrentAmmo = WeaponData->MaxAmmo;
+	//Only setup starting ammo to max ammo if no override has been provided.
+	if (!bOverrideDefaultAmmoCount)
+	{
+		CurrentAmmo = WeaponData->MaxAmmo;
+	}
+
+	V_LOGF(LogPBWeapon, TEXT("Current Ammo is:"), GetCurrentAmmo());
+
+	//Setup Fire Rate if using dynamic fire rate
+	if (WeaponData->bUseDynamicFireRate)
+	{
+		UPBAudioDetectionSubsystem* AudioDetectionSubsystem = GetWorld()->GetSubsystem<UPBAudioDetectionSubsystem>();
+		if (AudioDetectionSubsystem == nullptr)
+		{
+			V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AudioDetectionSubsystem"));
+			return;
+		}
+		WeaponData->FireRate = AudioDetectionSubsystem->GetBeatInterval(WeaponData->DynamicFireRateMode);
+	}
 }
 
 void APBWeaponBase::Equip()
 {	
-	if (WeaponData == nullptr)
+	if (!ensureAlwaysMsgf(WeaponData, TEXT("Invalid WeaponData")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid WeaponData"));
 		return;
 	}
 
-	if (WeaponData->AnimationLayer == nullptr)
+	if (!ensureAlwaysMsgf(WeaponData->AnimationLayer, TEXT("Invalid AnimationLayer")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
 		return;
 	}
 
-	if (WeaponData->EquipAnimation == nullptr)
-	{
-		V_LOG(LogPBWeapon, TEXT("Invalid EquipAnimation"));
+	if (!ensureAlwaysMsgf(WeaponData->EquipAnimation, TEXT("Invalid EquipAnimation")))
+	{		
+		return;
 	}
 
-	PBOwnerCharacter->GetMesh()->LinkAnimClassLayers(WeaponData->AnimationLayer);
-	PBOwnerCharacter->PlayAnimMontage(WeaponData->EquipAnimation);
+	GetPBOwner()->GetMesh()->LinkAnimClassLayers(WeaponData->AnimationLayer);
+	GetPBOwner()->PlayAnimMontage(WeaponData->EquipAnimation);
 }
 
 void APBWeaponBase::UnEquip()
@@ -89,6 +110,8 @@ void APBWeaponBase::UnEquip()
 		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
 		return;
 	}
+
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	PBOwnerCharacter->GetMesh()->UnlinkAnimClassLayers(WeaponData->AnimationLayer);
 }
@@ -115,7 +138,13 @@ void APBWeaponBase::Fire()
 		}
 		case EFireMode::Burst:
 		{
-			InternalBurstFire();
+			// Check if it's time to start a new burst
+			if (CurrentBurstCount <= 0)
+			{
+				CurrentBurstCount = WeaponData->BurstCount; // Set the number of shots in the burst
+				GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &APBWeaponBase::InternalBurstFire, WeaponData->FireRate, true, 0.f);
+			}
+
 			break;
 		}
 		default:
@@ -141,15 +170,15 @@ void APBWeaponBase::Fire()
 
 void APBWeaponBase::InternalBurstFire()
 {
-	if (CurrentBurstCount + 1 >= WeaponData->BurstCount)
+	if (CurrentAmmo <= 0 || CurrentBurstCount <= 0)
 	{
 		StopFire();
+		// Trigger InternalBurstFire to start a new burst
 		return;
 	}
 
-	CurrentBurstCount++;
+	CurrentBurstCount--;
 	InternalFire();
-	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &APBWeaponBase::InternalBurstFire, WeaponData->FireRate, false, 0.f);
 }
 
 void APBWeaponBase::InternalFire()
@@ -164,8 +193,7 @@ void APBWeaponBase::InternalFire()
 
 	FHitResult HitResult;
 	PerformLineTrace(HitResult);
-
-	BulletHitReactionComponent->PlayImpactFX(HitResult);
+	SpawnBulletProjectile(HitResult);
 
 	VSCREENMSGF("Current Ammo: %i", CurrentAmmo);
 
@@ -213,7 +241,7 @@ bool APBWeaponBase::PerformLineTrace(FHitResult& OutHitResult)
 
 	//Perform Line Trace
 	bool bLineTraceResult = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECollisionChannel::ECC_Visibility, CollisionQueryParams);
-	//DrawDebugLine(GetWorld(), StartLocation, EndLocation, HitResult.bBlockingHit ? FColor::Blue : FColor::Red, false, 5.0f, 0, 10.0f);
+	
 	OutHitResult = HitResult;
 	return bLineTraceResult;
 }
@@ -225,8 +253,38 @@ void APBWeaponBase::StopFire()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
 	}
+	if (BurstFireTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(BurstFireTimerHandle);
+	}
 
 	CurrentBurstCount = 0;
+}
+
+void APBWeaponBase::OverrideDefaultCurrentAmmoCount(const int InCurrentAmmo)
+{
+	bOverrideDefaultAmmoCount = true;
+	SetCurrentAmmo(InCurrentAmmo);
+}
+
+UPBWeaponDataBase* APBWeaponBase::GetWeaponData() const
+{
+	if (!ensureAlwaysMsgf(WeaponData, TEXT("Weapon Data is Invalid")))
+	{
+		return nullptr;
+	}
+
+	return WeaponData;
+}
+
+APBCharacter* APBWeaponBase::GetPBOwner()
+{
+	if (!ensureAlwaysMsgf(PBOwnerCharacter, TEXT("PBOwnerCharacter is null")))
+	{
+		return nullptr;
+	}
+	
+	return PBOwnerCharacter;
 }
 
 void APBWeaponBase::ReduceAmmo(int AmmoToReduce)
@@ -240,6 +298,42 @@ void APBWeaponBase::AddAmmo(int AmmoToAdd)
 	CurrentAmmo += AmmoToAdd;
 	CurrentAmmo = FMath::Clamp(CurrentAmmo, 0, WeaponData->MaxAmmo);
 }
+
+void APBWeaponBase::SpawnBulletProjectile(const FHitResult& InHitResult)
+{
+	if (!IsValid(WeaponData))
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid WeaponData"));
+		return;
+	}
+	if (WeaponData->ProjectileClass == nullptr)
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid ProjectileClass"));
+		return;
+	}
+
+	const FRotator& ShootDirection = UKismetMathLibrary::FindLookAtRotation(InHitResult.TraceStart, InHitResult.ImpactPoint);
+	const FVector& StartLocation = InHitResult.TraceStart + (ShootDirection.Vector() * 100.f);
+
+	const FTransform& SpawnTransform = FTransform(ShootDirection, StartLocation);
+	AActor* SpawnedProjectile = GetWorld()->SpawnActorDeferred<APBProjectile>(WeaponData->ProjectileClass.Get(), SpawnTransform, this, PBOwnerCharacter, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	if (!IsValid(SpawnedProjectile))
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid SpawnedProjectile"));
+		return;
+	}
+
+	APBProjectile* PBProjectile = Cast<APBProjectile>(SpawnedProjectile);
+	if (!IsValid(PBProjectile))
+	{
+		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid PBProjectile"));
+		return;
+	}
+
+	PBProjectile->GetProjectileMovementComponent()->InitialSpeed = WeaponData->ProjectileSpeed;
+	UGameplayStatics::FinishSpawningActor(SpawnedProjectile, SpawnTransform);
+}
+	
 
 // Called every frame
 void APBWeaponBase::Tick(float DeltaTime)
