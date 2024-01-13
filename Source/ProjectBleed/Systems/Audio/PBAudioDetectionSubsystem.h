@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "../../PBProjectENUMS.h"
 #include "PBAudioDetectionSubsystem.generated.h"
 
 class UFMODAudioComponent;
@@ -22,15 +23,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGhostOnQuarterBeatOccurSignature);
 /**
  * 
  */
-
-UENUM()
-enum class EBeatType : uint8
-{
-	Whole = 0,
-	Half = 1,
-	Quarter = 2,
-	Any = 3
-};
 
 USTRUCT(BlueprintType)
 struct FEventInformation
@@ -134,6 +126,10 @@ public:
 	*/
 	UFUNCTION()
 	bool WasOnBeat(float& OutAccuracy, const EBeatType InBeatType = EBeatType::Half);
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	float GetBeatInterval(const EBeatType InBeatType = EBeatType::Half) const { return CurrentEventInformation.BeatIntervals[InBeatType]; }
+
 	
 protected:
 	//Event information of the current event that's playing

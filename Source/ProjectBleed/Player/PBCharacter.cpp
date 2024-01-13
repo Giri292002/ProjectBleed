@@ -2,6 +2,8 @@
 
 
 #include "PBCharacter.h"
+
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
@@ -9,6 +11,7 @@
 #include "ProjectBleed/Systems/Locomotion/PBDashComponent.h"
 #include "ProjectBleed/Systems/Interaction/PBInteractionComponent.h"
 #include "ProjectBleed/Systems/Combat/PBCombatComponent.h"
+#include "ProjectBleed/Systems/PBThrowableObjectComponent.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
 
 DEFINE_LOG_CATEGORY(LogPBCharacter);
@@ -18,6 +21,8 @@ APBCharacter::APBCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	SpringArmComponent->SetupAttachment(RootComponent);
@@ -89,6 +94,12 @@ void APBCharacter::Interact()
 	if (!IsValid(InteractionComponent))
 	{
 		VSCREENMSG("Invalid Interaction Component");
+	}
+	if (CombatComponent->HasWeapon())
+	{
+		//Need to cache this now because the weapon will be nullptr after removed
+		CombatComponent->ThrowWeapon();
+		return;
 	}
 	InteractionComponent->Interact();
 }

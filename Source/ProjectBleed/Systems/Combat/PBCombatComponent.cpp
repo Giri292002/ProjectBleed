@@ -1,6 +1,7 @@
 // All Rights belong to Studio WASD 2023
 
 #include "PBCombatComponent.h"
+#include "ProjectBleed/Weapons/Components/PBThrowableWeaponComponent.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
 
 // Sets default values for this component's properties
@@ -32,7 +33,7 @@ void UPBCombatComponent::BeginPlay()
 }
 
 
-void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass)
+void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass, bool bOverrideDefaultAmmoCount, int InCurrentAmmo)
 {
 	//Check if we already have a weapon and remove it
 	if (CurrentWeapon != nullptr)
@@ -50,18 +51,23 @@ void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass)
 		return;
 	}
 
-	APBWeaponBase* SpawnedPBWeapon = Cast<APBWeaponBase>(GetWorld()->SpawnActor<APBWeaponBase>(WeaponClass, GetOwner()->GetActorLocation(), FRotator::ZeroRotator, SpawnParams));
-	if (!IsValid(SpawnedPBWeapon))
+	APBWeaponBase* SpawnedPBWeapon = Cast<APBWeaponBase>(GetWorld()->SpawnActorDeferred<APBWeaponBase>(WeaponClass, GetOwner()->GetActorTransform(), PBCharacterOwner, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn));
+	if (!ensureAlwaysMsgf(SpawnedPBWeapon, TEXT("Invalid SpawnedPBWeapon")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid SpawnedPBWeapon"));
 		return;
 	}
 
+	if (bOverrideDefaultAmmoCount)
+	{
+		SpawnedPBWeapon->OverrideDefaultCurrentAmmoCount(InCurrentAmmo);
+	}
+
+	SpawnedPBWeapon->FinishSpawning(GetOwner()->GetActorTransform());
 	CurrentWeapon = SpawnedPBWeapon;
 
 	const FAttachmentTransformRules& AttachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
 
-	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("weapon_r")));
+	SpawnedPBWeapon->AttachToComponent(PBCharacterOwner->GetMesh(), AttachmentRules, FName(TEXT("weapon_r_socket")));
 	SpawnedPBWeapon->Equip();
 }
 
@@ -74,8 +80,7 @@ void UPBCombatComponent::RemoveWeapon()
 	}
 
 	CurrentWeapon->UnEquip();
-	//TODO: Dont destroy, just drop the weapon
-	CurrentWeapon->Destroy();
+	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	CurrentWeapon = nullptr;
 }
 
@@ -99,6 +104,13 @@ void UPBCombatComponent::StopFireCurrentWeapon()
 	}
 
 	CurrentWeapon->StopFire();
+}
+
+void UPBCombatComponent::ThrowWeapon()
+{
+	APBWeaponBase* WeaponInHand = GetCurrentWeapon();
+	RemoveWeapon();
+	WeaponInHand->GetComponentByClass<UPBThrowableWeaponComponent>()->Throw();
 }
 
 // Called every frame

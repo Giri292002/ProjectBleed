@@ -11,13 +11,6 @@
 class UImage;
 class UCurveFloat;
 
-UENUM()
-enum class EBeatSpawnDirection : uint8
-{
-	Left = 0,
-	Right = 1
-};
-
 UCLASS()
 class PROJECTBLEED_API UPBBeatCrosshair : public UUserWidget
 {

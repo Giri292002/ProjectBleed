@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/PBWeaponDataBase.h"
 #include "GameFramework/Actor.h"
 #include "ProjectBleed/Systems/Scoring/PBScoringSubsystem.h"
-#include "Data/PBWeaponDataBase.h"
 #include "ProjectBleed/Player/PBCharacter.h"
 #include "PBWeaponBase.generated.h"
 
@@ -13,6 +13,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogPBWeapon, Log, All);
 
 class APBPlayerController;
 class UPBBulletHitReactionComponent;
+class UPBThrowableWeaponComponent;
 
 UCLASS()
 class PROJECTBLEED_API APBWeaponBase : public AActor
@@ -24,23 +25,23 @@ public:
 	APBWeaponBase();
 
 protected:
-	UPROPERTY(EditDefaultsOnly)
-	UPBBulletHitReactionComponent* BulletHitReactionComponent = nullptr;
-
 	UPROPERTY(BlueprintReadOnly)	
 	APBCharacter* PBOwnerCharacter = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Root")
-	USceneComponent* Root = nullptr;
-
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Weapon")
 	USkeletalMeshComponent* WeaponMesh;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed | Weapons  | Weapon")
+	UPBThrowableWeaponComponent* ThrowableWeaponomponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectBleed| Weapons | Data")
 	UPBWeaponDataBase* WeaponData = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "ProjectBleed| Weapons | Data")
 	int CurrentAmmo = 0;
+
+	UPROPERTY(VisibleAnywhere, Category = "ProjectBleed| Weapons | Data")
+	bool bOverrideDefaultAmmoCount = false;
 
 	UPROPERTY()
 	FTimerHandle FireTimerHandle;
@@ -50,6 +51,9 @@ protected:
 
 	UPROPERTY()
 	APBPlayerController* PBPlayerController = nullptr;
+
+	UPROPERTY()
+	FTimerHandle BurstFireTimerHandle;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -65,7 +69,12 @@ protected:
 
 	UFUNCTION()
 	bool PerformLineTrace(FHitResult& OutHitResult);
-	
+
+	/**
+	* @brief Spawns a bullet projectile
+	*/
+	UFUNCTION()
+	void SpawnBulletProjectile(const FHitResult& InHitResult);
 
 public:	
 	// Called every frame
@@ -89,9 +98,18 @@ public:
 	UFUNCTION()
 	int GetCurrentAmmo() const { return CurrentAmmo; }
 
+	UFUNCTION()
+	void SetCurrentAmmo(const int InCurrentAmmo) { CurrentAmmo = InCurrentAmmo; }
+
+	UFUNCTION()
+	void OverrideDefaultCurrentAmmoCount(const int InCurrentAmmo);
+
+	UFUNCTION()
+	APBCharacter* GetPBOwner();
+
 	//Returns the weapon data
 	UFUNCTION()
-	UPBWeaponDataBase* GetWeaponData() const { return WeaponData; }
+	UPBWeaponDataBase* GetWeaponData() const;
 
 	UFUNCTION()
 	bool HasAmmo() const { return CurrentAmmo > 0; }

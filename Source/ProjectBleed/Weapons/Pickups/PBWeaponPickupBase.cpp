@@ -51,7 +51,7 @@ void APBWeaponPickupBase::Interact_Implementation(AActor* Interactor)
 
 	if (UPBCombatComponent* CombatComponent = Interactor->GetComponentByClass<UPBCombatComponent>())
 	{
-		CombatComponent->GiveWeapon(WeaponToGive);
+		CombatComponent->GiveWeapon(WeaponToGive, bOverrideDefaultAmmoCount, CurrentAmmo);
 	}
 	else
 	{
@@ -60,6 +60,12 @@ void APBWeaponPickupBase::Interact_Implementation(AActor* Interactor)
 
 	Destroy();
 }
+void APBWeaponPickupBase::OverrideDefaultCurrentAmmoCount(int InCurrentAmmo)
+{
+	bOverrideDefaultAmmoCount = true;
+	CurrentAmmo = InCurrentAmmo;
+}
+
 // Called every frame
 void APBWeaponPickupBase::Tick(float DeltaTime)
 {

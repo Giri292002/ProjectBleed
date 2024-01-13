@@ -30,5 +30,5 @@ protected:
 
 public:	
 	//Interact with the object with highest priority
-	void Interact();		
+	void Interact();
 };

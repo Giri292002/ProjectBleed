@@ -33,8 +33,18 @@ void UPBBulletHitReactionComponent::PlayImpactFX(const FHitResult& HitResult)
 
 	if (HitResult.bBlockingHit)
 	{
+		TEnumAsByte<EPhysicalSurface> PhysicalSurface;
 		//Play Random Particle System based on Effect Type
-		const TEnumAsByte<EPhysicalSurface> PhysicalSurface = HitResult.PhysMaterial.Get()->SurfaceType;
+		if (HitResult.PhysMaterial == nullptr)
+		{
+			UE_LOG(LogPBWeapon, Warning, TEXT("No Physical Material found"));
+			PhysicalSurface = EPhysicalSurface::SurfaceType_Default;
+		}
+		else
+		{
+			PhysicalSurface = HitResult.PhysMaterial.Get()->SurfaceType;
+		}
+
 		const TArray<UNiagaraSystem*> NiagaraSystems = BulletFXData->SurfaceBulletImpactFXPair.FindRef(PhysicalSurface).ParticleSystem;
 
 		if(NiagaraSystems.IsEmpty())
