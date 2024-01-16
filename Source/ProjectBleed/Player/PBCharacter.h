@@ -14,6 +14,7 @@ class USpringArmComponent;
 class UPBInteractionComponent;
 class UPBDashComponent;
 class UPBCombatComponent;
+class UPBHealthComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPBCharacter, Log, All);
 
@@ -44,6 +45,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "ProjectBleed | Character | Combat")
 	UPBCombatComponent* CombatComponent;
+
+	UPROPERTY(EditAnywhere, Category = "ProjectBleed | Character | Health")
+	UPBHealthComponent* HealthComponent;
 
 	UPROPERTY()
 	FVector2D MovementDirection;

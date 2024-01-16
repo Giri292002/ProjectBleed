@@ -5,11 +5,11 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "../../PBProjectENUMS.h"
+#include "../Data/PBProjectileData.h"
 #include "PBWeaponDataBase.generated.h"
 
-class APBProjectile;
-class UPBScoreData;
 class APBWeaponPickupBase;
+class UPBScoreData;
 
 UCLASS()
 class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
@@ -23,9 +23,6 @@ class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
 		UPROPERTY(EditDefaultsOnly, Category = "Default", meta=(MinClamp = 0))
 		int MaxAmmo = 10;
 
-		UPROPERTY(EditDefaultsOnly, Category = "Default", meta = (MinClamp = 0))
-		int WeaponDamage = 10;
-
 		UPROPERTY(EditDefaultsOnly, Category = "Default")
 		bool bUseDynamicFireRate = false;
 
@@ -38,14 +35,11 @@ class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
 		UPROPERTY(EditDefaultsOnly, Category = "Default", meta = (MinClamp = 0, EditCondition = "WeaponFireMode == EFireMode::Burst", EditConditionHides))
 		int BurstCount = 0;
 
-		UPROPERTY(EditDefaultsOnly, Category = "Projectile")
-		TSubclassOf<APBProjectile> ProjectileClass = nullptr;
-
 		UPROPERTY(EditDefaultsOnly, Category = "Default")
 		float WeaponRange = 1000.f;	
 
-		UPROPERTY(EditDefaultsOnly, Category = "Default")
-		float ProjectileSpeed = 4000.f;
+		UPROPERTY(EditDefaultsOnly)
+		UPBProjectileData* ProjectileData;
 
 		UPROPERTY(EditDefaultsOnly, Category = "Default")
 		TSubclassOf<APBWeaponPickupBase> WeaponPickupToSpawn;

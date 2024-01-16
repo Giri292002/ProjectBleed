@@ -301,14 +301,12 @@ void APBWeaponBase::AddAmmo(int AmmoToAdd)
 
 void APBWeaponBase::SpawnBulletProjectile(const FHitResult& InHitResult)
 {
-	if (!IsValid(WeaponData))
+	if (!ensureAlwaysMsgf(WeaponData, TEXT("Invalid WeaponData")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid WeaponData"));
 		return;
 	}
-	if (WeaponData->ProjectileClass == nullptr)
+	if (!ensureAlwaysMsgf(WeaponData->ProjectileData, TEXT("Invalid ProjectileData")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid ProjectileClass"));
 		return;
 	}
 
@@ -316,21 +314,14 @@ void APBWeaponBase::SpawnBulletProjectile(const FHitResult& InHitResult)
 	const FVector& StartLocation = InHitResult.TraceStart + (ShootDirection.Vector() * 100.f);
 
 	const FTransform& SpawnTransform = FTransform(ShootDirection, StartLocation);
-	AActor* SpawnedProjectile = GetWorld()->SpawnActorDeferred<APBProjectile>(WeaponData->ProjectileClass.Get(), SpawnTransform, this, PBOwnerCharacter, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	if (!IsValid(SpawnedProjectile))
+	APBProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<APBProjectile>(GetWeaponData()->ProjectileData->ProjectileClass.Get(), SpawnTransform, this, PBOwnerCharacter, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+	if (!ensureAlwaysMsgf(SpawnedProjectile, TEXT("Invalid spawned PBProjectile")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid SpawnedProjectile"));
 		return;
 	}
 
-	APBProjectile* PBProjectile = Cast<APBProjectile>(SpawnedProjectile);
-	if (!IsValid(PBProjectile))
-	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid PBProjectile"));
-		return;
-	}
-
-	PBProjectile->GetProjectileMovementComponent()->InitialSpeed = WeaponData->ProjectileSpeed;
+	SpawnedProjectile->SetProjectileData(GetWeaponData()->ProjectileData);
 	UGameplayStatics::FinishSpawningActor(SpawnedProjectile, SpawnTransform);
 }
 	

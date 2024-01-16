@@ -3,8 +3,10 @@
 
 #include "PBProjectile.h"
 #include "Components/SphereComponent.h"
+#include "Engine/DamageEvents.h"
 #include "NiagaraComponent.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
+#include "ProjectBleed/Weapons/Data/PBProjectileData.h"
 #include "ProjectBleed/Weapons/Components/PBBulletHitReactionComponent.h"
 
 // Sets default values
@@ -39,7 +41,10 @@ void APBProjectile::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* Ot
 {
 	UE_LOG(LogTemp, Log, TEXT("Projectile Hit: %s"), *OtherActor->GetName());
 	
-	//TODO: Add damage
+	//TODO: Do other types of damage based on an enum in ProjectileData
+
+	const FPointDamageEvent PointDamageEvent = FPointDamageEvent();
+	OtherActor->TakeDamage(GetProjectileData()->WeaponDamage, PointDamageEvent, GetInstigatorController(), GetInstigator());
 
 	BulletHitReactionComponent->PlayImpactFX(Hit);
 	Destroy();
@@ -50,6 +55,7 @@ void APBProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GetProjectileMovementComponent()->InitialSpeed = GetProjectileData()->ProjectileSpeed;
 }
 
 // Called every frame
@@ -66,5 +72,22 @@ void APBProjectile::FireProjectile()
 void APBProjectile::FireProjectileInDirection(const FVector& ShootDirection)
 {
 	ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed;
+}
+
+UPBProjectileData* APBProjectile::GetProjectileData() const
+{
+	if (ensureAlwaysMsgf(ProjectileData, TEXT("ProjectileData is Invalid")))
+	{
+		return ProjectileData;
+	}
+	return nullptr;
+}
+
+void APBProjectile::SetProjectileData(UPBProjectileData* InProjectileData)
+{
+	if (ensureAlwaysMsgf(InProjectileData, TEXT("InProjectileData is invalid")))
+	{
+		ProjectileData = InProjectileData;
+	}
 }
 
