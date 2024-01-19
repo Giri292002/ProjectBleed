@@ -15,6 +15,8 @@ class APBPlayerController;
 class UPBBulletHitReactionComponent;
 class UPBThrowableWeaponComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBulletCountChangeSignature, int32, CurrentBulletRemaining);
+
 UCLASS()
 class PROJECTBLEED_API APBWeaponBase : public AActor
 {
@@ -77,6 +79,9 @@ protected:
 	void SpawnBulletProjectile(const FHitResult& InHitResult);
 
 public:	
+	UPROPERTY()
+	FOnBulletCountChangeSignature OnBulletCountChange;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

@@ -8,7 +8,7 @@ public class ProjectBleed : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysicsCore", "HeadMountedDisplay", "EnhancedInput", "Niagara" });
-		PrivateDependencyModuleNames.AddRange(new string[] {"FMODStudio"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysicsCore", "HeadMountedDisplay", "EnhancedInput", "Niagara", "UMG" });
+		PrivateDependencyModuleNames.AddRange(new string[] {"FMODStudio", "Slate", "SlateCore"});
 	}
 }

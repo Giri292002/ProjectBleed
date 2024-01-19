@@ -10,6 +10,9 @@
 
 class APBWeaponPickupBase;
 class UPBScoreData;
+class UImage;
+class UPBWeaponWidget;
+class UPBWeaponUIData;
 
 UCLASS()
 class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
@@ -61,4 +64,7 @@ class PROJECTBLEED_API UPBWeaponDataBase : public UDataAsset
 
 		UPROPERTY(EditDefaultsOnly, Category = "Scoring")
 		UPBScoreData* ScoreData = nullptr;
+
+		UPROPERTY(EditDefaultsOnly, Category = "UI")
+		UPBWeaponUIData* WeaponUIData;
 };
