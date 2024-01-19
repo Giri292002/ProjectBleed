@@ -15,7 +15,5 @@ class PROJECTBLEED_API UPBThrowableWeaponComponent : public UPBThrowableObjectCo
 	GENERATED_BODY()
 	
 protected:
-	//TODO: Add weapon pickup spawn class to PBWeaponDataBase.h and access that info from here
-
 	virtual void OnStopped(const FHitResult& Imapct) override;
 };

@@ -8,9 +8,10 @@
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "ProjectBleed/Systems/Locomotion/PBDashComponent.h"
-#include "ProjectBleed/Systems/Interaction/PBInteractionComponent.h"
 #include "ProjectBleed/Systems/Combat/PBCombatComponent.h"
+#include "ProjectBleed/Systems/Interaction/PBInteractionComponent.h"
+#include "ProjectBleed/Systems/Health/PBHealthComponent.h"
+#include "ProjectBleed/Systems/Locomotion/PBDashComponent.h"
 #include "ProjectBleed/Systems/PBThrowableObjectComponent.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
 
@@ -35,6 +36,8 @@ APBCharacter::APBCharacter()
 	InteractionComponent = CreateDefaultSubobject<UPBInteractionComponent>(TEXT("InteractionComponent"));
 
 	CombatComponent = CreateDefaultSubobject<UPBCombatComponent>(TEXT("CombatComponent"));
+
+	HealthComponent = CreateDefaultSubobject<UPBHealthComponent>(TEXT("HealthComponent"));
 
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationPitch = false;

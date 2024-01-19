@@ -10,6 +10,7 @@
 class UPBBulletHitReactionComponent;
 class UNiagaraComponent;
 class USphereComponent;
+class UPBProjectileData;
 
 UCLASS()
 class PROJECTBLEED_API APBProjectile : public AActor
@@ -22,7 +23,12 @@ public:
 
 	UFUNCTION()
 	void OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 protected:
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Default")
+	UPBProjectileData* ProjectileData;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Default")
 	USphereComponent* SphereComponent = nullptr;
 
@@ -53,6 +59,13 @@ public:
 	//Get Projectile Movement Component
 	UFUNCTION()
 	UProjectileMovementComponent* GetProjectileMovementComponent() const { return ProjectileMovementComponent; }
+
+	//Get Projectile Data
+	UFUNCTION()
+	UPBProjectileData* GetProjectileData() const;
+
+	UFUNCTION()
+	void SetProjectileData(UPBProjectileData* InProjectileData);
 
 
 };

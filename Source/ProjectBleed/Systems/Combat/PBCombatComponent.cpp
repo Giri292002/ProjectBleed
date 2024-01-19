@@ -51,7 +51,7 @@ void UPBCombatComponent::GiveWeapon(TSubclassOf<APBWeaponBase> WeaponClass, bool
 		return;
 	}
 
-	APBWeaponBase* SpawnedPBWeapon = Cast<APBWeaponBase>(GetWorld()->SpawnActorDeferred<APBWeaponBase>(WeaponClass, GetOwner()->GetActorTransform(), PBCharacterOwner, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn));
+	APBWeaponBase* SpawnedPBWeapon = Cast<APBWeaponBase>(GetWorld()->SpawnActorDeferred<APBWeaponBase>(WeaponClass, GetOwner()->GetActorTransform(), PBCharacterOwner, PBCharacterOwner, ESpawnActorCollisionHandlingMethod::AlwaysSpawn));
 	if (!ensureAlwaysMsgf(SpawnedPBWeapon, TEXT("Invalid SpawnedPBWeapon")))
 	{
 		return;

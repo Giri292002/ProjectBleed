@@ -7,9 +7,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "ProjectBleed/Core/PBHUD.h"
 #include "ProjectBleed/Libraries/CustomLogging.h"
 #include "ProjectBleed/Player/PBPlayerController.h"
 #include "ProjectBleed/Systems/Audio/PBAudioDetectionSubsystem.h"
+#include "ProjectBleed/UI/PBWeaponWidget.h"
 #include "ProjectBleed/Weapons/Components/PBBulletHitReactionComponent.h"
 #include "ProjectBleed/Weapons/Components/PBThrowableWeaponComponent.h"
 #include "ProjectBleed/Weapons/PBProjectile.h"
@@ -99,6 +101,21 @@ void APBWeaponBase::Equip()
 		return;
 	}
 
+	if (ensureAlwaysMsgf(WeaponData->WeaponUIData, TEXT("Invalid Weapon UI Data")))
+	{
+
+		const APlayerController* PC = Cast<APlayerController>(GetInstigatorController());
+		if (ensureMsgf(PC, TEXT("Invalid Player Controller")))
+		{
+			APBHUD* PBHUD = Cast<APBHUD>(PC->GetHUD());
+			if (!ensureMsgf(PBHUD, TEXT("Invalid PBHUD")))
+			{
+				return;
+			}
+			PBHUD->UpdateWeaponWidget(this);
+		}
+	}
+
 	GetPBOwner()->GetMesh()->LinkAnimClassLayers(WeaponData->AnimationLayer);
 	GetPBOwner()->PlayAnimMontage(WeaponData->EquipAnimation);
 }
@@ -109,6 +126,17 @@ void APBWeaponBase::UnEquip()
 	{
 		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid AnimationLayer"));
 		return;
+	}
+
+	const APlayerController* PC = Cast<APlayerController>(GetInstigatorController());
+	if (ensureMsgf(PC, TEXT("Invalid Player Controller")))
+	{
+		APBHUD* PBHUD = Cast<APBHUD>(PC->GetHUD());
+		if (!ensureMsgf(PBHUD, TEXT("Invalid PBHUD")))
+		{
+			return;
+		}
+		PBHUD->RemoveWeaponWidget();
 	}
 
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -279,9 +307,14 @@ UPBWeaponDataBase* APBWeaponBase::GetWeaponData() const
 
 APBCharacter* APBWeaponBase::GetPBOwner()
 {
-	if (!ensureAlwaysMsgf(PBOwnerCharacter, TEXT("PBOwnerCharacter is null")))
+	if (PBOwnerCharacter == nullptr)
 	{
-		return nullptr;
+		if (!ensureAlwaysMsgf(GetOwner(), TEXT("No Owner")))
+		{
+			return nullptr;
+		}
+		PBOwnerCharacter = Cast<APBCharacter>(GetOwner());
+		return PBOwnerCharacter;
 	}
 	
 	return PBOwnerCharacter;
@@ -289,26 +322,24 @@ APBCharacter* APBWeaponBase::GetPBOwner()
 
 void APBWeaponBase::ReduceAmmo(int AmmoToReduce)
 {
-	CurrentAmmo -= AmmoToReduce;
-	CurrentAmmo = FMath::Clamp(CurrentAmmo, 0, WeaponData->MaxAmmo);
+	CurrentAmmo = FMath::Clamp(CurrentAmmo - AmmoToReduce, 0, WeaponData->MaxAmmo);
+	OnBulletCountChange.Broadcast(CurrentAmmo);
 }
 
 void APBWeaponBase::AddAmmo(int AmmoToAdd)
 {
-	CurrentAmmo += AmmoToAdd;
-	CurrentAmmo = FMath::Clamp(CurrentAmmo, 0, WeaponData->MaxAmmo);
+	CurrentAmmo = FMath::Clamp(CurrentAmmo += AmmoToAdd, 0, WeaponData->MaxAmmo);
+	OnBulletCountChange.Broadcast(CurrentAmmo);
 }
 
 void APBWeaponBase::SpawnBulletProjectile(const FHitResult& InHitResult)
 {
-	if (!IsValid(WeaponData))
+	if (!ensureAlwaysMsgf(WeaponData, TEXT("Invalid WeaponData")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid WeaponData"));
 		return;
 	}
-	if (WeaponData->ProjectileClass == nullptr)
+	if (!ensureAlwaysMsgf(WeaponData->ProjectileData, TEXT("Invalid ProjectileData")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid ProjectileClass"));
 		return;
 	}
 
@@ -316,21 +347,14 @@ void APBWeaponBase::SpawnBulletProjectile(const FHitResult& InHitResult)
 	const FVector& StartLocation = InHitResult.TraceStart + (ShootDirection.Vector() * 100.f);
 
 	const FTransform& SpawnTransform = FTransform(ShootDirection, StartLocation);
-	AActor* SpawnedProjectile = GetWorld()->SpawnActorDeferred<APBProjectile>(WeaponData->ProjectileClass.Get(), SpawnTransform, this, PBOwnerCharacter, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	if (!IsValid(SpawnedProjectile))
+	APBProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<APBProjectile>(GetWeaponData()->ProjectileData->ProjectileClass.Get(), SpawnTransform, this, PBOwnerCharacter, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+	if (!ensureAlwaysMsgf(SpawnedProjectile, TEXT("Invalid spawned PBProjectile")))
 	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid SpawnedProjectile"));
 		return;
 	}
 
-	APBProjectile* PBProjectile = Cast<APBProjectile>(SpawnedProjectile);
-	if (!IsValid(PBProjectile))
-	{
-		V_LOG_ERROR(LogPBWeapon, TEXT("Invalid PBProjectile"));
-		return;
-	}
-
-	PBProjectile->GetProjectileMovementComponent()->InitialSpeed = WeaponData->ProjectileSpeed;
+	SpawnedProjectile->SetProjectileData(GetWeaponData()->ProjectileData);
 	UGameplayStatics::FinishSpawningActor(SpawnedProjectile, SpawnTransform);
 }
 	
