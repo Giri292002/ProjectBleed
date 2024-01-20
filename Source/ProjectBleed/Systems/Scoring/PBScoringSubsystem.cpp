@@ -45,9 +45,8 @@ bool UPBScoringSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 
 void UPBScoringSubsystem::AddToScore(const UPBScoreData* InScore)
 {
-	if(!IsValid(InScore))
+	if (!ensureAlwaysMsgf(InScore, TEXT("Incoming Score Data is NULL")))
 	{
-		V_LOG_ERROR(LogPBScoringSubsystem, TEXT("Incoming Score Data is NULL"));
 		return;
 	}
 
@@ -78,5 +77,8 @@ void UPBScoringSubsystem::AddToScore(const UPBScoreData* InScore)
 	
 	BaseScore += FinalAddedScore;
 	CurrentScore = BaseScore * CurrentScoreMultiplier;
+
+	OnScoreUpdate.Broadcast(CurrentScore);
+
 	V_LOGF(LogPBScoringSubsystem, TEXT("Current Score is: %i"), CurrentScore);
 }

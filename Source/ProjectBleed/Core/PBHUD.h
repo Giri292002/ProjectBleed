@@ -11,6 +11,7 @@
  */
 class UPBWeaponWidget;
 class UPBCrosshair;
+class UPBScoringWidget;
 class APBWeaponBase;
 
 UCLASS()
@@ -45,6 +46,9 @@ protected:
 	TSubclassOf<UPBCrosshair> CrosshairWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UPBScoringWidget> ScoringWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UPBWeaponWidget> WeaponWidgetClass;
 
 	/*
@@ -57,6 +61,7 @@ protected:
 private:
 	UUserWidget* CrosshairWidget;
 	UPBWeaponWidget* CurrentWeaponWidget;
+	UPBScoringWidget* ScoringWidget;
 
 	virtual void BeginPlay() override;
 };

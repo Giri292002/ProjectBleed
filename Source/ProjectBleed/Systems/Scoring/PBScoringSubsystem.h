@@ -11,15 +11,22 @@ DECLARE_LOG_CATEGORY_EXTERN(LogPBScoringSubsystem, Log, All);
 
 class UFMODEvent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreUpdateSignature, int, NewScore);
+
 UCLASS()
 class PROJECTBLEED_API UPBScoringSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintAssignable, Category = "PB Scoring System")
+	FOnScoreUpdateSignature OnScoreUpdate;
+
+	//Returns the score with multiploer
 	UFUNCTION(BlueprintCallable, Category = "PB Scoring System")
 	int GetCurrentScore() const { return CurrentScore; }
 
+	// Returns the normal score without multiplier
 	UFUNCTION(BlueprintCallable, Category = "PB Scoring System")
 	int GetBaseScore() const { return BaseScore; }
 

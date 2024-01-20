@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidgetBlueprint.h"
 #include "ProjectBleed/UI/PBCrosshair.h"
 #include "ProjectBleed/UI/PBWeaponWidget.h"
+#include "ProjectBleed/UI/PBScoringWidget.h"
 #include "ProjectBleed/Weapons/PBWeaponBase.h"
 #include "ProjectBleed/Weapons/Data/PBWeaponUIData.h"
 
@@ -13,13 +14,22 @@ void APBHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (ensureAlwaysMsgf(CrosshairWidgetClass, TEXT("Crosshair Widget is invalid")))
+	if (ensureAlwaysMsgf(CrosshairWidgetClass, TEXT("Crosshair Widget class is invalid")))
 	{
 		//Only create crosshair if we dont already have one
 		if (CrosshairWidget == nullptr)
 		{
 			CrosshairWidget = CreateWidget<UPBCrosshair>(GetWorld(), CrosshairWidgetClass);
 			CrosshairWidget->AddToViewport();
+		}
+	}
+
+	if (ensureAlwaysMsgf(ScoringWidgetClass, TEXT("Scoring Widget class is invalid")))
+	{
+		if (ScoringWidget == nullptr)
+		{
+			ScoringWidget = CreateWidget<UPBScoringWidget>(GetWorld(), ScoringWidgetClass);
+			ScoringWidget->AddToViewport();
 		}
 	}
 }
