@@ -181,19 +181,6 @@ void APBWeaponBase::Fire()
 			break;
 		}
 	}
-
-	//Add Score
-
-	UPBScoringSubsystem* PBScoringSystem = GetWorld()->GetSubsystem<UPBScoringSubsystem>();
-
-	if (WeaponData->ScoreData != nullptr && PBScoringSystem != nullptr)
-	{
-		PBScoringSystem->AddToScore(WeaponData->ScoreData);
-	}
-	else
-	{
-		V_LOG(LogPBWeapon, TEXT("Invalid ScoreData or PBScoringSystem"));
-	}
 }
 
 void APBWeaponBase::InternalBurstFire()
@@ -222,6 +209,19 @@ void APBWeaponBase::InternalFire()
 	FHitResult HitResult;
 	PerformLineTrace(HitResult);
 	SpawnBulletProjectile(HitResult);
+
+	//Add Score
+
+	UPBScoringSubsystem* PBScoringSystem = GetWorld()->GetSubsystem<UPBScoringSubsystem>();
+
+	if (WeaponData->ScoreData != nullptr && PBScoringSystem != nullptr)
+	{
+		PBScoringSystem->AddToScore(WeaponData->ScoreData);
+	}
+	else
+	{
+		V_LOG(LogPBWeapon, TEXT("Invalid ScoreData or PBScoringSystem"));
+	}
 
 	VSCREENMSGF("Current Ammo: %i", CurrentAmmo);
 

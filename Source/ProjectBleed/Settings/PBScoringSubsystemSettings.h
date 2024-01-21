@@ -18,4 +18,9 @@ class PROJECTBLEED_API UPBScoringSubsystemSettings : public UDeveloperSettings
 	public:
 		UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Scoring")
 		TSoftObjectPtr<UFMODEvent> OnAccurateHitEventPath;
+
+		//When the character is not doing anything, we trickle down the score every beat
+		//This defines how much score we remove every beat
+		UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Scoring")
+		int TrickleDownAmount = 2;
 };

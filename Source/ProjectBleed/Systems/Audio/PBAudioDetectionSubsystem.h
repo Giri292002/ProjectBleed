@@ -141,9 +141,12 @@ protected:
 	FEventInformation GhostEventInformation;
 
 	//This is how much early or after a beat its considered to be "on beat".
-	//Default to Quarter Beat Interval / 4
+	//Automagically defaults to Quarter Beat Interval / 4 + Beat Leniency Correction
 	UPROPERTY()
 	float BeatLeniency = 0.1f;
+
+	UPROPERTY()
+	float BeatLeniencyCorrection;
 
 	UPROPERTY()
 	TMap<EBeatType, float> TimeSinceLastBeat;

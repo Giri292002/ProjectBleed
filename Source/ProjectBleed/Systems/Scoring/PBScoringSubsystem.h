@@ -48,9 +48,23 @@ protected:
 	UPROPERTY()
 	int CurrentScoreMultiplier = 1;
 
+	//How much score should we reduce every beat. Set from Scoring Settings
+	UPROPERTY()
+	int TrickleDownAmount = 1;
+
 	UPROPERTY()
 	UFMODEvent* OnAccurateHitEvent;
-	
+
+	UFUNCTION()
+	void OnBeatOccur();
+
+	/*
+	* Reduces score based on a delta
+	* @param InScoreToReduce The Amount of score to reduce
+	*/
+	UFUNCTION()
+	void ReduceScore(const int InScoreToReduce);
+
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual TStatId GetStatId() const override;
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;

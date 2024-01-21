@@ -5,6 +5,7 @@
 
 #include "FMODAudioComponent.h"
 #include "PBBackgroundMusicPlayer.h"
+#include "ProjectBleed/Settings/PBAudioDetectionSettings.h"
 #include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogPBAudioDetectionSubsystem)
@@ -94,7 +95,7 @@ void UPBAudioDetectionSubsystem::SetupSubsystem()
 
 bool UPBAudioDetectionSubsystem::WasOnBeat( float& OutAccuracy, const EBeatType InBeatType)
 {
-	const float AccuracyFromLastBeat =( BeatLeniency - TimeSinceLastBeat[InBeatType]) / BeatLeniency;
+	const float AccuracyFromLastBeat =(BeatLeniency - TimeSinceLastBeat[InBeatType]) / BeatLeniency;
 	const float AccuracyToNextBeat = (BeatLeniency - GetTimeTillNextBeat(InBeatType)) / BeatLeniency;
 	//Select the more accurate percentage
 	OutAccuracy = FMath::Clamp(AccuracyFromLastBeat >= AccuracyToNextBeat ? AccuracyFromLastBeat : AccuracyToNextBeat, 0.f, 1.f);
@@ -109,7 +110,7 @@ void UPBAudioDetectionSubsystem::ProcessAudio(float InTempo)
 	GetGhostEventInformation().BeatIntervals.Add(EBeatType::Quarter, GetGhostEventInformation().BeatIntervals[EBeatType::Half] / 2.f);
 	GetGhostEventInformation().bFinishSettingUp = true;
 
-	BeatLeniency = GetGhostEventInformation().BeatIntervals[EBeatType::Quarter] / 4.f;
+	BeatLeniency = (GetGhostEventInformation().BeatIntervals[EBeatType::Quarter] / 4.f) + BeatLeniencyCorrection;
 	
 	CurrentEventInformation = GhostEventInformation;
 
@@ -142,6 +143,11 @@ void UPBAudioDetectionSubsystem::Initialize(FSubsystemCollectionBase& Collection
 #if !WITH_EDITOR
 	SetupSubsystem();
 #endif
+	const UPBAudioDetectionSettings* Settings = GetDefault<UPBAudioDetectionSettings>();
+	if (IsValid(Settings))
+	{
+		BeatLeniencyCorrection = Settings->BeatLeniencyCorrection;
+	}
 }
 
 TStatId UPBAudioDetectionSubsystem::GetStatId() const
