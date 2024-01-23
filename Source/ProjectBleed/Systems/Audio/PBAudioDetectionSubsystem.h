@@ -20,9 +20,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQuarterBeatOccurSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGhostOnBeatOccurSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGhostOnHalfBeatOccurSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGhostOnQuarterBeatOccurSignature);
-/**
- * 
- */
+
+//The defined step accuracy when we perform calculations. How fine are we combing the timeline
+static EBeatType GLOBAL_BEAT_STEP_ACCURACY = EBeatType::Half; 
 
 USTRUCT(BlueprintType)
 struct FEventInformation
@@ -103,7 +103,7 @@ public:
 	float GetBeatLeniency() const { return BeatLeniency; }
 
 	UFUNCTION(BlueprintCallable, Category= "Audio", BlueprintPure)
-	float GetTimeSinceLastBeat(const EBeatType InBeatType = EBeatType::Any) const { return TimeSinceLastBeat[InBeatType]; }
+	float GetTimeSinceLastBeat(const EBeatType InBeatType = EBeatType::Any) const { return TimeSincePreviousBeat[InBeatType]; }
 
 	UFUNCTION()
 	EBeatType GetLastPlayedBeat() const { return LastPlayedBeat; }
@@ -114,21 +114,47 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	float GetTimeTillNextBeat(const EBeatType InBeatType);
+
+	/**
+	* Time since the previous beat. 
+	* @Param InBeatType Which previous beat type do we want
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	float GetTimeSincePreviousBeat(const EBeatType InBeatType);
 	
 	UFUNCTION()
 	FTimerHandle& GetDelayedMusicTimerHandle() { return DelayedMusicPlayTimerHandle; }
 
 	/**
 	* Checks if player was on beat by checking if the time since any last beat or time till next half beat is smaller than the Beat Leniency.
-	* We use half step since that's the most accurate substep for the player since doing actions on quarter beat is not supported.
+	* We use half step since that's the most accurate substep for the player since doing actions on quarter beat is way too fine of an interval to calculate.
 	* @param InBeatType What type of beat should we check against. Default is any ie. Whole and half.
 	* @param OutAccuracy How accurate was the player in hitting the beat. 0 = 0%, 1 = 100%
 	*/
 	UFUNCTION()
-	bool WasOnBeat(float& OutAccuracy, const EBeatType InBeatType = EBeatType::Half);
+	bool WasOnBeat(double& OutAccuracy, const EBeatType InBeatType = GLOBAL_BEAT_STEP_ACCURACY) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	float GetBeatInterval(const EBeatType InBeatType = EBeatType::Half) const { return CurrentEventInformation.BeatIntervals[InBeatType]; }
+
+	/* Returns the exact time a beat was occured
+	* @param InBeatType The beat type to get the time of
+	* @return bool If the data for that beat exists or not
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	bool GetTimeOfPreviousBeat(EBeatType const InBeatType, double& OutTimeOfPreviousBeat) const;
+
+	/*
+	* Returns the time the next beat will occur
+	* @param InBeatType The next beat type we want the time for
+	* @return bool If the data for that beat exists or not
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	bool GetTimeOfNextBeat(EBeatType const InBeatType, double& OutTimeOfNextBeat) const;
+
+	//Returns if the main music is playing. This is NOT the ghost music.
+	UFUNCTION()
+	bool IsMusicPlaying() const;
 
 	
 protected:
@@ -141,7 +167,7 @@ protected:
 	FEventInformation GhostEventInformation;
 
 	//This is how much early or after a beat its considered to be "on beat".
-	//Automagically defaults to Quarter Beat Interval / 4 + Beat Leniency Correction
+	//Automagically defaults to Quarter Beat Interval / 2 + Beat Leniency Correction
 	UPROPERTY()
 	float BeatLeniency = 0.1f;
 
@@ -149,7 +175,11 @@ protected:
 	float BeatLeniencyCorrection;
 
 	UPROPERTY()
-	TMap<EBeatType, float> TimeSinceLastBeat;
+	TMap<EBeatType, float> TimeSincePreviousBeat;
+
+	//Records exact game time of when the last beat occured
+	UPROPERTY()
+	TMap<EBeatType, float> TimeOfPreviousBeat;
 
 	//Overridden Functions
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
@@ -176,6 +206,9 @@ protected:
 
 	UFUNCTION()
 	void UpdateTimesSinceLastBeat(const float InDeltaTime);
+
+	UFUNCTION()
+	void RecordTimeOfBeat(EBeatType const InBeatType);
 
 	virtual void Tick(float DeltaTime) override;	
 
@@ -215,6 +248,10 @@ private:
 
 	UPROPERTY()
 	EBeatType LastPlayedBeat;
+
+	//Set from PBAudioDetectionSettings
+	UPROPERTY()
+	float AccuracyCutoff;
 
 	//Fills up CurrentEventInformation. Called from the first beat of an event
 	UFUNCTION()

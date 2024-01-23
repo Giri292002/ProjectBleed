@@ -26,6 +26,7 @@ void UPBScoringWidget::NativeConstruct()
 		return;
 	}
 
+	OnScoreUpdate(0);
 	PBAudioDetectionSubsystem->OnBeatOccurDelegate.AddDynamic(this, &UPBScoringWidget::OnWholeBeat);
 }
 

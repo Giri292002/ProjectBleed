@@ -91,7 +91,7 @@ void APBHUD::RemoveWeaponWidget()
 		return;
 	}
 
-	GetCurrentWeaponWidget()->RemoveFromViewport();
+	GetCurrentWeaponWidget()->RemoveFromParent();
 }
 
 UPBWeaponWidget* APBHUD::GetCurrentWeaponWidget()

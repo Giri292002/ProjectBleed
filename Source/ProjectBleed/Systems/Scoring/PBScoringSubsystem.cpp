@@ -62,7 +62,7 @@ void UPBScoringSubsystem::AddToScore(const UPBScoreData* InScore)
 	}
 
 	UPBAudioDetectionSubsystem* AudioDetectionSubsystem = GetWorld()->GetSubsystem<UPBAudioDetectionSubsystem>();
-	float OutAccuracy;
+	double OutAccuracy;
 	if(AudioDetectionSubsystem->WasOnBeat(OutAccuracy))
 	{		
 		V_LOGF(LogPBScoringSubsystem, TEXT("Was on beat with accuracy: %f"), OutAccuracy);
